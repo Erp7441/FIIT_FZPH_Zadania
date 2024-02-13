@@ -6,6 +6,6 @@ Ako importnut freeglut po instalacii pomocou cmakeu:
 find_package(GLUT REQUIRED)
 find_package(OpenGL REQUIRED)
 
-...
+# Zvysok konfigu az po spodok...
 target_link_libraries(Test PRIVATE GLUT::GLUT OpenGL::GL OpenGL::GLU)
 ```
