@@ -81,13 +81,14 @@ void update(const int i)
     if (b_collided)
     {
         glutLeaveMainLoop();
+        draw_quads();
 
         //! Vypocet drahy
         float path_len_calc = path_x1 + path_x2;
 
-        printf("\nPrejdena draha: \nX1 (modre vozidlo) = %f\nX2 (zelene vozidlo) = %f", path_x1, path_x2);
-        printf("\nS1 + S2 = %f", path_len_calc);
-        printf("\nZadana draha = %f", path_len);
+        printf("\nPrejdena draha: \nX1 (modre vozidlo) = %.4f\nX2 (zelene vozidlo) = %.4f", path_x1, path_x2);
+        printf("\nS1 + S2 = %.4f", path_len_calc);
+        printf("\nZadana draha = %.4f", path_len);
     }
 
     int current_time = glutGet(GLUT_ELAPSED_TIME);
@@ -121,7 +122,8 @@ void update_movement(float frame_delta_time)
 
     if (remaning_path - mov_x1 < 0.f)
     {
-        mov_x1 = remaning_path;
+        mov_x1 = remaning_path / 2;
+        mov_x2 = remaning_path / 2;
         b_collided = 1;
     }
     coord_x1 -= mov_x1;
