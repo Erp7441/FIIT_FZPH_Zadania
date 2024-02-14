@@ -1,2 +1,6 @@
 
-=c:S125¢"Remove the commented out code.(‚–ü˜ùÿÿÿÿ8Ÿò™ÈÚ1
+5c:S1481"unused variable 'winX'( ÏÓ‡üÿÿÿÿ8Í°íÊÚ1
+5c:S1481"unused variable 'winY'( ÏÓ‡üÿÿÿÿ8Í°íÊÚ1
+5c:S1481"unused variable 'winZ'( ÏÓ‡üÿÿÿÿ8Í°íÊÚ1
+Oc:S1659"0Define each identifier in a dedicated statement.( ÏÓ‡üÿÿÿÿ8Î°íÊÚ1
+bc:S9360"IEither add a parameter list or the "&" operator to this use of "display".(ìŒ™—8Î°íÊÚ1

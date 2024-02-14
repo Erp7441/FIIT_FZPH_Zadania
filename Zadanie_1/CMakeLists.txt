@@ -6,6 +6,7 @@ find_package(OpenGL REQUIRED)
 set(CMAKE_C_STANDARD 11)
 
 add_executable(Zadanie_1 main.c)
+#add_executable(Zadanie_1 test.c)
 #add_executable(Zadanie_1 debug.c)
 #add_executable(Zadanie_1 collision_time.c)
 

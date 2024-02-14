@@ -8,9 +8,17 @@
 #include <GL/glut.h>
 #include <GL/freeglut.h>
 #include <stdio.h>
+#include <math.h>
 
 
-int start_time = 0;  // Pociatocny cas animacie
+// Deklaracia funkcii
+void update_movement(float frame_delta_time);
+void update(int i);
+
+void draw_quads();
+void draw_quad(float x, float y, float z);
+
+void get_input_params();
 
 
 // Vstupne parametre (zadavane pred zacatim animacie)
@@ -33,70 +41,44 @@ float coord_x2 = 0.f;
 float path_x1 = 0.f;
 float path_x2 = 0.f;
 
-
 // Celkovy cas
 int frame_last_time = 0;
 
-// Deklaracia funkcii
-void update_movement(float frame_delta_time);
-void check_collision();
-void update(int i);
-void draw_quads();
-void draw_quad(float x, float y, float z);
-void get_input_params();
+// Boolean pre kolizu
+int b_collided = 0;
+
+// Kolko cesty nam ostava este prejst
+float remaning_path = 0.f;
+
 
 int main(int argc, char **argv)
 {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE);
-    glutInitWindowSize(1080, 640);
-    glutInitWindowPosition(200, 150);
+    glutInitWindowSize(1920, 1080);
 
     // Ziskanie vstupnych paramterov od usera.
     get_input_params();
+    remaning_path = path_len;
 
     // Inicializacia pozicii
     coord_x1 = (path_len + 0.5f) / 2.f;  // Treba ratat s tym ze draha by sa nam predlzila o nasu sirku. To nechceme.
     coord_x2 = (-path_len - 0.5f) / 2.f;
-
-    // Pociatocny cas animacie
-    start_time = glutGet(GLUT_ELAPSED_TIME);
 
     glutCreateWindow("OpenGL: Zadanie 1");
     glutDisplayFunc(&draw_quads);
 
     glutTimerFunc(time_step, update, 0);
     glutMainLoop();
+
     return 0;
 }
 
 
 void update(const int i)
 {
-    int current_time = glutGet(GLUT_ELAPSED_TIME);
-
-    // Cas kolko trvalo vygenerovanie framu
-    float frame_delta_time = 0.f;
-    if (frame_last_time != 0)
-    {
-        // Aktualny cas - cas konca posledneho framu = cas generovania aktualneho framu
-        frame_delta_time = (float)(current_time - frame_last_time) / 1000.0f;
-    }
-
-    update_movement(frame_delta_time);
-    check_collision();
-
-    // Vykresli novy frame
-    glutPostRedisplay();
-    glutTimerFunc(time_step, update, i + 1);
-
-    // Cas konca framu
-    frame_last_time = current_time;
-}
-
-void check_collision()
-{
-    if (coord_x1 <= coord_x2 + 0.5f)
+    // Narazili sme na predchadzajucom frame?
+    if (b_collided)
     {
         glutLeaveMainLoop();
 
@@ -107,22 +89,54 @@ void check_collision()
         printf("\nS1 + S2 = %f", path_len_calc);
         printf("\nZadana draha = %f", path_len);
     }
-}
 
+    int current_time = glutGet(GLUT_ELAPSED_TIME);
+
+    // Cas kolko trvalo vygenerovanie framu
+    float frame_delta_time = 0.f;
+    if (frame_last_time != 0)
+    {
+        // Aktualny cas - cas konca posledneho framu = cas generovania aktualneho framu
+        frame_delta_time = (float)(current_time - frame_last_time) / 1000.0f;
+    }
+
+    // Vykresli novy frame
+    update_movement(frame_delta_time);
+
+    glutPostRedisplay();
+    glutTimerFunc(time_step, update, i + 1);
+
+    // Cas konca framu
+    frame_last_time = current_time;
+}
 
 void update_movement(float frame_delta_time)
 {
+    if (b_collided) return;
+
     // s = v * t
     float mov_x1 = vel_x1 * frame_delta_time;
     float mov_x2 = vel_x2 * frame_delta_time;
 
+
+    if (remaning_path - mov_x1 < 0.f)
+    {
+        mov_x1 = remaning_path;
+        b_collided = 1;
+    }
     coord_x1 -= mov_x1;
-    coord_x2 += mov_x2;
-
-    // Udrziavanie dlzky prejdenej drahy
     path_x1 += mov_x1;
-    path_x2 += mov_x2;
+    remaning_path -= mov_x1;
 
+
+    if (remaning_path - mov_x2 < 0.f)
+    {
+        mov_x2 = remaning_path;
+        b_collided = 1;
+    }
+    coord_x2 += mov_x2;
+    path_x2 += mov_x2;
+    remaning_path -= mov_x2;
 }
 
 
@@ -140,8 +154,6 @@ void draw_quad(float x, float y, float z)
 
     glEnd();
 }
-
-
 void draw_quads()
 {
     glClear(GL_COLOR_BUFFER_BIT);
@@ -159,7 +171,7 @@ void draw_quads()
 void get_input_params()
 {
     // Ziskanie vstupnych parametrov
-    printf("Zadajte dlzku drahy S v metroch: ");
+    printf("Zadajte dlzku drahy S: ");
     scanf("%f", &path_len);
     getchar();
     if (path_len < 0) {
