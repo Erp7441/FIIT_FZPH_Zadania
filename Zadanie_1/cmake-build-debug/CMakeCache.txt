@@ -201,6 +201,9 @@ GLUT_Xmu_LIBRARY:FILEPATH=GLUT_Xmu_LIBRARY-NOTFOUND
 //Path to a library.
 GLUT_glut_LIBRARY:FILEPATH=/usr/lib/x86_64-linux-gnu/libglut.so
 
+//The directory containing a CMake configuration file for MATH_LIBRARY.
+MATH_LIBRARY_DIR:PATH=MATH_LIBRARY_DIR-NOTFOUND
+
 //Path to a file.
 OPENGL_EGL_INCLUDE_DIR:PATH=/usr/include
 

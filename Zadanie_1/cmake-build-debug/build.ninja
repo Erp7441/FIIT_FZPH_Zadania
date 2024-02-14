@@ -65,7 +65,7 @@ build CMakeFiles/Zadanie_1.dir/main.c.o: C_COMPILER__Zadanie_1_unscanned_Debug /
 
 build Zadanie_1: C_EXECUTABLE_LINKER__Zadanie_1_Debug CMakeFiles/Zadanie_1.dir/main.c.o | /usr/lib/x86_64-linux-gnu/libglut.so /usr/lib/x86_64-linux-gnu/libGLU.so /usr/lib/x86_64-linux-gnu/libGLX.so /usr/lib/x86_64-linux-gnu/libOpenGL.so
   FLAGS = -g
-  LINK_LIBRARIES = /usr/lib/x86_64-linux-gnu/libglut.so  /usr/lib/x86_64-linux-gnu/libGLU.so  /usr/lib/x86_64-linux-gnu/libGLX.so  /usr/lib/x86_64-linux-gnu/libOpenGL.so
+  LINK_LIBRARIES = /usr/lib/x86_64-linux-gnu/libglut.so  /usr/lib/x86_64-linux-gnu/libGLU.so  -lm  /usr/lib/x86_64-linux-gnu/libGLX.so  /usr/lib/x86_64-linux-gnu/libOpenGL.so
   OBJECT_DIR = CMakeFiles/Zadanie_1.dir
   POST_BUILD = :
   PRE_LINK = :

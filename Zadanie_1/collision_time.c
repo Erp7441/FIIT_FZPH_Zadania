@@ -8,13 +8,13 @@
 #include <GL/glut.h>
 #include <GL/freeglut.h>
 #include <stdio.h>
-#include <math.h>
 
 #define DEBUG_STOP  // Stopne program po kolizii
-#define DEBUG  // Zapne debugovacie vypisi
+//#define DEBUG  // Zapne debugovacie vypisi
 
 
-int start_time = 0;  // Pociatocny cas animacie
+// Pociatocny cas animacie
+int start_time = 0;
 
 
 // Vstupne parametre (zadavane pred zacatim animacie)
@@ -24,7 +24,7 @@ float path_len = 0.f;
 
 
 // FPSka
-const int frame_rate = 240;
+const int frame_rate = 240;  // Optimal value je 240 FPS ale zalezi hlavne od rychlosti kociek
 const unsigned int time_step = 1000 / frame_rate;
 
 
@@ -40,6 +40,9 @@ float path_x2 = 0.f;
 
 // Celkovy cas
 int frame_last_time = 0;
+float collision_time = 0.f;
+float elapsed_time = 0.f;
+
 
 // Deklaracia funkcii
 void update_movement(float frame_delta_time);
@@ -47,6 +50,7 @@ void check_collision();
 void update(int i);
 void draw_quads();
 void draw_quad(float x, float y, float z);
+
 
 int main(int argc, char **argv)
 {
@@ -72,16 +76,21 @@ int main(int argc, char **argv)
     scanf("%f", &vel_x2);
     getchar();
 
-    coord_x1 = (path_len + 0.5f) / 2.f;  // Treba ratat s tym ze draha by sa nam predlzila o nasu sirku. To nechceme.
+    // Vypocet casu kolizie pomocou rovnomerneho priamociareho pohybu: t = s / (v_1 + v_2)
+    collision_time = path_len / (vel_x1 + vel_x2);
+
+    // Treba ratat s tym ze draha by sa nam predlzila o nasu sirku. To nechceme.
+    coord_x1 = (path_len + 0.5f) / 2.f;
     coord_x2 = (-path_len - 0.5f) / 2.f;
 
-    start_time = glutGet(GLUT_ELAPSED_TIME);
 
-    glutCreateWindow("OpenGL: Zadanie 1");
-    glutDisplayFunc(&draw_quads);
+    start_time = glutGet(GLUT_ELAPSED_TIME);  // Cas zacatia animacie
 
-    glutTimerFunc(time_step, update, 0);
-    glutMainLoop();
+    glutCreateWindow("OpenGL: Zadanie 1");  // Vytvorenie okna
+    glutDisplayFunc(&draw_quads);  // Vykreslenie stvorcov
+
+    glutTimerFunc(time_step, update, 0);  // Timer na update funkciu
+    glutMainLoop();  // Main loop vykreslovania
     return 0;
 }
 
@@ -99,24 +108,28 @@ void update(const int i)
     }
 
     #ifdef DEBUG
-        printf("Frame: %d\t coord_x1: %f, coord_x2: %f, condition: %d\n", i, coord_x1, coord_x2, coord_x1 <=
-        coord_x2 + 0.5f);
+        printf("Collision elapsed time: %f \t Frame delta time: %f\n", elapsed_time, frame_delta_time);
     #endif
 
     update_movement(frame_delta_time);
     check_collision();
+
+    // Kolko casu nam ubehlo do teraz
+    elapsed_time = (float)(current_time - start_time) / 1000.0f;
+    elapsed_time -= frame_delta_time;
 
     // Vykresli novy frame
     glutPostRedisplay();
     glutTimerFunc(time_step, update, i + 1);
 
     // Cas konca framu
-    frame_last_time = current_time;
+    frame_last_time = glutGet(GLUT_ELAPSED_TIME);
 }
+
 
 void check_collision()
 {
-    if (coord_x1 <= coord_x2 + 0.5f)
+    if (elapsed_time >= collision_time)
     {
         #ifdef DEBUG
             int end_time = glutGet(GLUT_ELAPSED_TIME);
@@ -141,6 +154,8 @@ void check_collision()
 
         #ifdef DEBUG
             printf("\nDEBUG: Animation elapsed - %fs", animation_elapsed_time);
+            printf("\nDEBUG: Collision time - %fs", collision_time);
+            printf("\nDEBUG: Collision elapsed - %fs", elapsed_time);
 
             float over_shoot = path_len_calc - path_len;
             printf("\n\n-------------------------------------");
@@ -159,22 +174,12 @@ void update_movement(float frame_delta_time)
     float mov_x1 = vel_x1 * frame_delta_time;
     float mov_x2 = vel_x2 * frame_delta_time;
 
-//    float remaining_distance = path_len - path_x1 - path_x2;
-//    float tolerance = 0.01f;
-//    if (remaining_distance <= mov_x1 + mov_x2 + tolerance) {
-//        float overlap = (mov_x1 + mov_x2) - remaining_distance;
-//        mov_x1 -= overlap * (vel_x1 / (vel_x1 + vel_x2));
-//        mov_x2 -= overlap * (vel_x2 / (vel_x1 + vel_x2));
-//    }
-
-
     coord_x1 -= mov_x1;
     coord_x2 += mov_x2;
 
     // Udrziavanie dlzky prejdenej drahy
-    path_x1 += fabsf(mov_x1);
-    path_x2 += fabsf(mov_x2);
-
+    path_x1 += mov_x1;
+    path_x2 += mov_x2;
 }
 
 

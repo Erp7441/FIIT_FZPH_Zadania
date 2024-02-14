@@ -1102,6 +1102,18 @@
 			"value" : "/usr/lib/x86_64-linux-gnu/libglut.so"
 		},
 		{
+			"name" : "MATH_LIBRARY_DIR",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "The directory containing a CMake configuration file for MATH_LIBRARY."
+				}
+			],
+			"type" : "PATH",
+			"value" : "MATH_LIBRARY_DIR-NOTFOUND"
+		},
+		{
 			"name" : "OPENGL_EGL_INCLUDE_DIR",
 			"properties" : 
 			[
