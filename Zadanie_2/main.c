@@ -1,3 +1,6 @@
+// Nakladiak ide rovnomerne
+// Auto ide zrychlene
+
 
 #include <GL/gl.h>
 #include <GL/glut.h>
@@ -5,42 +8,46 @@
 #include <stdio.h>
 #include <math.h>
 
-// Nakladiak ide rovnomerne
-// Auto ide zrychlene
+// Constants
+//#define COORDS
+//#define PATH
+#define FPS 240
+#define TIME_STEP (1000 / FPS)
 
 
 // Deklaracia funkcii
 void update_movement(float frame_delta_time);
 void update(int i);
-
 void draw_quads();
 void draw_quad(float x, float y, float z);
-
 void get_input_params();
 
-float time_elapsed = 0.f;
+// Cas
+unsigned int start_time = 0;
+unsigned int last_frame_time = 0;
+unsigned int elapsed = 0;  // Cas framu
+float time_elapsed = 0.f;  // Celkovy cas
+
 
 // Vstupne parametre (zadavane pred zacatim animacie)
-float vel_x1 = 1.0f;
-float vel_x2 = 1.0f;
-float acc_x1 = 1.f;
-float acc_x2 = 1.f;
-
-
-// FPSka
-const int frame_rate = 60;
-const unsigned int time_step = 1000 / frame_rate;
+float acc_x1 = 4.f;
+float vel_x2 = 20.f;
 
 
 // X-ove suradnice kociek
-float coord_x1 = -.5f;
-float coord_x2 = -.5f;
+float coord_x1 = 0.f;
+float coord_x2 = 0.f;
+float path_x1 = 0.f;
+float path_x2 = 0.f;
 
-// Celkovy cas
-int frame_last_time = 0;
 
-// Boolean pre stret
-int b_meet = 0;
+// Pociatocne body
+float start_x1 = -2.f;
+float start_x2 = -2.f;
+
+
+// Skalovanie
+float scale = 0.01f;  // Skalovanie na metre
 
 
 int main(int argc, char **argv)
@@ -52,11 +59,12 @@ int main(int argc, char **argv)
     // Ziskanie vstupnych paramterov od usera.
     get_input_params();
 
-    glutCreateWindow("OpenGL: Zadanie 1");
+    glutCreateWindow("OpenGL: Zadanie 2");
     glutFullScreen();
+    start_time = glutGet(GLUT_ELAPSED_TIME);
     glutDisplayFunc(&draw_quads);
 
-    glutTimerFunc(time_step, update, 0);
+    glutTimerFunc(TIME_STEP, update, 0);
     glutMainLoop();
 
     return 0;
@@ -65,59 +73,56 @@ int main(int argc, char **argv)
 
 void update(const int i)
 {
-    if (b_meet)
-    {
+    unsigned int current_time = glutGet(GLUT_ELAPSED_TIME);
+    time_elapsed = (float)(current_time - start_time) / 1000.0f;
 
+    elapsed = current_time - last_frame_time;
+
+    if (elapsed > TIME_STEP)
+    {
+        last_frame_time = current_time - (elapsed % TIME_STEP);
+        glutPostRedisplay();
+    }
+
+    update_movement(time_elapsed);
+    glutTimerFunc(TIME_STEP, update, i + 1);
+
+}
+
+void update_movement(float t)
+{
+
+    // Vzorec: x = 1/2 * a * t^2
+    float mov_x1 = (0.5f * acc_x1) * (t*t);
+    // Vzorec: s = v * t
+    float mov_x2 = vel_x2 * t;
+
+    coord_x1 = start_x1 + (mov_x1 * scale);
+    coord_x2 = start_x2 + (mov_x2 * scale);
+
+    #ifdef COORDS
+        printf("X1 = %.4f\n", coord_x1);
+        printf("X2 = %.4f\n", coord_x2);
+    #endif
+
+    if (coord_x1 >= coord_x2)
+    {
         glutLeaveMainLoop();
         draw_quads();
 
-
         // Vzorec: t = 2*v / a
-        float cas = (2 * vel_x1) / (acc_x1);
-        printf("X1 cas: %.4f", cas);
+        float cas = (2 * vel_x2) / acc_x1;
+        printf("Vypocitany cas: %.3f", cas);
 
-        float cas2 = (2 * vel_x2) / (acc_x2);
-        printf("X2 cas: %.4f\n", cas2);
+        printf("\nVozidla sa stretli v case = %.3f\n", time_elapsed);
 
-
-
+        #ifdef PATH
+            path_x1 = fabsf(coord_x1 - start_x1);
+            path_x2 = fabsf(coord_x2 - start_x2);
+            printf("Cesta auta: %.3f\n", path_x1);
+            printf("Cesta nakladiaka: %.3f\n", path_x2);
+        #endif
     }
-
-    int current_time = glutGet(GLUT_ELAPSED_TIME);
-
-    // Cas kolko trvalo vygenerovanie framu
-    float frame_delta_time = 0.f;
-    if (frame_last_time != 0)
-    {
-        // Aktualny cas - cas konca posledneho framu = cas generovania aktualneho framu
-        frame_delta_time = (float)(current_time - frame_last_time) / 1000.0f;
-        time_elapsed += frame_delta_time;
-    }
-
-    // Vykresli novy frame
-    update_movement(frame_delta_time);
-
-    glutPostRedisplay();
-    glutTimerFunc(time_step, update, i + 1);
-
-    // Cas konca framu
-    frame_last_time = current_time;
-}
-
-void update_movement(float frame_delta_time)
-{
-    if (b_meet) return;
-
-    float mov_x1 = acc_x1 * (frame_delta_time*frame_delta_time);
-    float mov_x2 = vel_x2 * frame_delta_time;
-
-    coord_x1 += mov_x1;
-    coord_x2 += mov_x2;
-
-    printf("X1 = %.4f\n", coord_x1);
-    printf("X2 = %.4f\n", coord_x2);
-
-//    if (coord_x1 == coord_x2) b_meet = 1;
 }
 
 
@@ -151,11 +156,6 @@ void draw_quads()
 
 void get_input_params()
 {
-
-    printf("Zadajte rychlost  auta (modre): ");
-    scanf("%f", &vel_x1);
-    getchar();
-
     printf("Zadajte zrychlenie  auta (modre): ");
     scanf("%f", &acc_x1);
     getchar();

@@ -55,7 +55,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "/mnt/c/Users/Martin/Repos/FZPH_Zadania/Zadanie_2/cmake-build-debug"
+			"value" : "/mnt/c/Users/Martin/Desktop/FZPH_Zadania/Zadanie_2/cmake-build-debug-wsl"
 		},
 		{
 			"name" : "CMAKE_CACHE_MAJOR_VERSION",
@@ -151,11 +151,11 @@
 				},
 				{
 					"name" : "HELPSTRING",
-					"value" : "No help, variable specified on the command line."
+					"value" : "C compiler"
 				}
 			],
-			"type" : "UNINITIALIZED",
-			"value" : "gcc"
+			"type" : "FILEPATH",
+			"value" : "/usr/bin/cc"
 		},
 		{
 			"name" : "CMAKE_C_COMPILER_AR",
@@ -415,7 +415,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "/mnt/c/Users/Martin/Repos/FZPH_Zadania/Zadanie_2/cmake-build-debug/CMakeFiles/pkgRedirects"
+			"value" : "/mnt/c/Users/Martin/Desktop/FZPH_Zadania/Zadanie_2/cmake-build-debug-wsl/CMakeFiles/pkgRedirects"
 		},
 		{
 			"name" : "CMAKE_GENERATOR",
@@ -475,7 +475,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "/mnt/c/Users/Martin/Repos/FZPH_Zadania/Zadanie_2"
+			"value" : "/mnt/c/Users/Martin/Desktop/FZPH_Zadania/Zadanie_2"
 		},
 		{
 			"name" : "CMAKE_INSTALL_PREFIX",
@@ -1259,7 +1259,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "/mnt/c/Users/Martin/Repos/FZPH_Zadania/Zadanie_2/cmake-build-debug"
+			"value" : "/mnt/c/Users/Martin/Desktop/FZPH_Zadania/Zadanie_2/cmake-build-debug-wsl"
 		},
 		{
 			"name" : "Zadanie_2_IS_TOP_LEVEL",
@@ -1283,7 +1283,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "/mnt/c/Users/Martin/Repos/FZPH_Zadania/Zadanie_2"
+			"value" : "/mnt/c/Users/Martin/Desktop/FZPH_Zadania/Zadanie_2"
 		},
 		{
 			"name" : "_CMAKE_LINKER_PUSHPOP_STATE_SUPPORTED",
