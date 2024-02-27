@@ -129,29 +129,29 @@ Zadanie_3/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Zadanie_3.dir/build.make CMakeFiles/Zadanie_3.dir/build
 .PHONY : Zadanie_3/fast
 
-main.o: main.c.o
-.PHONY : main.o
+Jednotka.o: Jednotka.c.o
+.PHONY : Jednotka.o
 
 # target to build an object file
-main.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Zadanie_3.dir/build.make CMakeFiles/Zadanie_3.dir/main.c.o
-.PHONY : main.c.o
+Jednotka.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Zadanie_3.dir/build.make CMakeFiles/Zadanie_3.dir/Jednotka.c.o
+.PHONY : Jednotka.c.o
 
-main.i: main.c.i
-.PHONY : main.i
+Jednotka.i: Jednotka.c.i
+.PHONY : Jednotka.i
 
 # target to preprocess a source file
-main.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Zadanie_3.dir/build.make CMakeFiles/Zadanie_3.dir/main.c.i
-.PHONY : main.c.i
+Jednotka.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Zadanie_3.dir/build.make CMakeFiles/Zadanie_3.dir/Jednotka.c.i
+.PHONY : Jednotka.c.i
 
-main.s: main.c.s
-.PHONY : main.s
+Jednotka.s: Jednotka.c.s
+.PHONY : Jednotka.s
 
 # target to generate assembly for a file
-main.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Zadanie_3.dir/build.make CMakeFiles/Zadanie_3.dir/main.c.s
-.PHONY : main.c.s
+Jednotka.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Zadanie_3.dir/build.make CMakeFiles/Zadanie_3.dir/Jednotka.c.s
+.PHONY : Jednotka.c.s
 
 # Help Target
 help:
@@ -162,9 +162,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... Zadanie_3"
-	@echo "... main.o"
-	@echo "... main.i"
-	@echo "... main.s"
+	@echo "... Jednotka.o"
+	@echo "... Jednotka.i"
+	@echo "... Jednotka.s"
 .PHONY : help
 
 

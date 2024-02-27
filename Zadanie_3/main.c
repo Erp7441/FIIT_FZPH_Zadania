@@ -1,6 +1,7 @@
 // Zbierat data y a cas
 // Zrobit graf napr. v gnuplot
 // Hodis loptu do vzduchu, simulacia dopadu
+// Cas vyjadrime kvadratickou
 
 #include <GL/gl.h>
 #include <GL/glut.h>
@@ -10,8 +11,14 @@
 
 #define FPS 240
 #define TIME_STEP (1000 / FPS)
+#define G 9.81
 
-void draw_circle(float x, float y, float z);
+// Input parameters
+//const float start_y = -2.f;
+float vel_0 = 1.f;
+
+
+void draw_circle(float x, float y, float z, float scale);
 void draw_circles();
 void update(int i);
 void update_movement(float t);
@@ -23,12 +30,24 @@ unsigned int last_frame_time = 0;
 unsigned int elapsed = 0;  // Cas framu
 float time_elapsed = 0.f;  // Celkovy cas
 
+float coord_y = 0.f;
+float size = 0.2f;
+
+float scale = 0.01f;
+
 int main(int argc, char **argv)
 {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
     glutInitWindowSize(1366, 768);
 
+    printf("Zadajte vysku:");
+    scanf("%f", &coord_y);
+    getchar();
+
+    printf("Zadajte pociatocnu rychlost:");
+    scanf("%f", &vel_0);
+    getchar();
 
     glutCreateWindow("OpenGL: Zadanie 3");
     glutDisplayFunc(&draw_circles);
@@ -60,11 +79,12 @@ void update(const int i)
 
 void update_movement(float t)
 {
+    coord_y = (float)(vel_0 * t - (1 / 2) * 9.81 * (t * t)) * scale;
 
 }
 
 
-void draw_circle(float x, float y, float z)
+void draw_circle(float x, float y, float z, float s)
 {
     glTranslatef(x, y, z);
     glBegin(GL_TRIANGLE_FAN);
@@ -75,7 +95,7 @@ void draw_circle(float x, float y, float z)
     {
         float cos_x = (float)cos(PI_2 * i/NUM_RAYS);
         float sin_y = (float)sin(PI_2 * i/NUM_RAYS);
-        glVertex2f(cos_x, sin_y);
+        glVertex2f(cos_x * s, sin_y * s);
     }
     glEnd();
 }
@@ -104,7 +124,7 @@ void draw_circles()
     glClear(GL_COLOR_BUFFER_BIT);
 
     glColor3f(0.0f, 0.0f, 1.0f);  // Modra
-    draw_circle(0.f, 0.f, 0.f);
+    draw_circle(0.f, coord_y, 0.f, size);
 
     glutSwapBuffers();
 }

@@ -6,4 +6,5 @@ find_package(OpenGL REQUIRED)
 set(CMAKE_C_STANDARD 11)
 
 add_executable(Zadanie_3  main.c)
+#add_executable(Zadanie_3  Jednotka.c)
 target_link_libraries(Zadanie_3 PRIVATE GLUT::GLUT OpenGL::GL OpenGL::GLU m)

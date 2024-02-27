@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <math.h>
 
-
 void draw_circle(float x, float y, float z);
 void draw_circles();
 
@@ -45,7 +44,8 @@ void draw_circle(float x, float y, float z)
     glEnd();
 }
 
-void resize(int w, int h) {
+void resize(int w, int h)
+{
     glViewport(0, 0, w, h);
     glMatrixMode(GL_PROJECTION);
 
