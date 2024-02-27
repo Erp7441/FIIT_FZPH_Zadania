@@ -10,7 +10,7 @@
 
 // Constants
 //#define COORDS
-//#define PATH
+#define PATH
 #define FPS 240
 #define TIME_STEP (1000 / FPS)
 

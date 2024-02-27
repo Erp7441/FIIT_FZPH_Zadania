@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.27)
+cmake_minimum_required(VERSION 3.25)
 project(Zadanie_1 C)
 find_package(GLUT REQUIRED)
 find_package(OpenGL REQUIRED)

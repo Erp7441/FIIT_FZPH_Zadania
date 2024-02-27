@@ -20,6 +20,7 @@ void draw_quad(float x, float y, float z);
 
 void get_input_params();
 
+float time_elapsed = 0.f;
 
 // Vstupne parametre (zadavane pred zacatim animacie)
 float vel_x1 = 1.0f;
@@ -80,15 +81,22 @@ void update(const int i)
     // Narazili sme na predchadzajucom frame?
     if (b_collided)
     {
+
         glutLeaveMainLoop();
         draw_quads();
 
         //! Vypocet drahy
         float path_len_calc = path_x1 + path_x2;
 
+        // Vypocet casu
+        float cas = path_len_calc / (vel_x1 + vel_x2);
+
         printf("\nPrejdena draha: \nX1 (modre vozidlo) = %.4f\nX2 (zelene vozidlo) = %.4f", path_x1, path_x2);
         printf("\nS1 + S2 = %.4f", path_len_calc);
         printf("\nZadana draha = %.4f", path_len);
+        printf("\nCas kolizie %.4f", time_elapsed);
+        printf("\nVypocitany cas kolizie %.4f", cas);
+
     }
 
     int current_time = glutGet(GLUT_ELAPSED_TIME);
@@ -99,6 +107,7 @@ void update(const int i)
     {
         // Aktualny cas - cas konca posledneho framu = cas generovania aktualneho framu
         frame_delta_time = (float)(current_time - frame_last_time) / 1000.0f;
+        time_elapsed += frame_delta_time;
     }
 
     // Vykresli novy frame
