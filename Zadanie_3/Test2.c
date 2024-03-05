@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#define FPS 60
+#define FPS 1
 #define TIME_STEP (1000 / FPS)
 #define G 9.81
 

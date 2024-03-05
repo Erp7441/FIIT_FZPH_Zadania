@@ -9,12 +9,12 @@
 #include <stdio.h>
 #include <math.h>
 
-#define FPS 240
+#define FPS 60
 #define TIME_STEP (1000 / FPS)
 #define G 9.81
 
 // Input parameters
-float start_y = 0.f;
+float start_y = 0.5f;
 float vel_0 = 20.f;
 
 void draw_circle(float x, float y, float z, float scale);
@@ -22,7 +22,6 @@ void draw_circles();
 void update(int i);
 void update_movement(float t);
 void resize(int w, int h);
-float get_land_time();
 
 // Cas
 unsigned int start_time = 0;
@@ -32,8 +31,7 @@ float time_elapsed = 0.f;  // Celkovy cas
 
 float coord_y = 0.f;
 float size = 0.2f;
-float t_d = 0.f;
-float scale = 1.f / 100.f;
+float scale = 1.f / 10.f;
 float y = 0.f;
 
 int b_stop = 0;
@@ -43,23 +41,18 @@ int main(int argc, char **argv)
 {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
-    glutInitWindowSize(1366, 768);
+    glutInitWindowSize(750, 1080);
+    glutInitWindowPosition(0, 0);
 
     printf("Zadajte vysku:");
     scanf("%f", &start_y);
     getchar();
-    start_y--;
 
     printf("Zadajte pociatocnu rychlost:");
     scanf("%f", &vel_0);
     getchar();
 
-//    start_y *= scale;
-//    vel_0 /= scale;
-    coord_y = start_y;
-// 0.5,
-
-    t_d = get_land_time();
+    coord_y = start_y * scale;
 
     glutCreateWindow("OpenGL: Zadanie 3");
     start_time = glutGet(GLUT_ELAPSED_TIME);
@@ -94,7 +87,6 @@ void update(const int i)
         glutPostRedisplay();
 //        glutLeaveMainLoop();
 
-        printf("Predpokladany cas dopadu: %f\n", t_d);
         printf("Cas skoncenia %f\n", time_elapsed);
         b_printed = 1;
     }
@@ -104,12 +96,12 @@ void update(const int i)
 
 void update_movement(float t)
 {
-    float val = (float) (start_y + vel_0 * t - 0.5f * G * (t * t));
+    float val = (float)  (start_y + vel_0 * t - 0.5f * G * (t * t));
 
     coord_y = ((float)val) * scale;
     y += coord_y;
 
-    printf("Cas: %f, Y: %f\n", t, y);
+    printf("%f    %f\n", t, val);
     if (y + size <= -1)
     {
         b_stop = 1;
@@ -161,15 +153,4 @@ void draw_circles()
     draw_circle(0.f, coord_y, 0.f, size);
 
     glutSwapBuffers();
-}
-
-float get_land_time()
-{
-    float a = 0.5f * (float)G;
-    float b = vel_0;
-    float c = start_y;
-
-    float t_d1 = (float) (-b + sqrtf(b * b - 4 * a * c)) / (2 * a);
-    float t_d2 = (float) (-b - sqrtf(b * b - 4 * a * c)) / (2 * a);
-    return fmaxf(fabsf(t_d1), fabsf(t_d2));
 }

@@ -39,7 +39,7 @@
 				{
 					"directoryIndex" : 0,
 					"id" : "Zadanie_3::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-Zadanie_3-Debug-a8fdd5105382e63c128b.json",
+					"jsonFile" : "target-Zadanie_3-Debug-26d66d13d07247beb346.json",
 					"name" : "Zadanie_3",
 					"projectIndex" : 0
 				}
@@ -49,8 +49,8 @@
 	"kind" : "codemodel",
 	"paths" : 
 	{
-		"build" : "C:/Users/Martin/Desktop/FZPH_Zadania/Zadanie_3/cmake-build-debug",
-		"source" : "C:/Users/Martin/Desktop/FZPH_Zadania/Zadanie_3"
+		"build" : "C:/Users/Martin/Repos/FZPH_Zadania/Zadanie_3/cmake-build-debug",
+		"source" : "C:/Users/Martin/Repos/FZPH_Zadania/Zadanie_3"
 	},
 	"version" : 
 	{
