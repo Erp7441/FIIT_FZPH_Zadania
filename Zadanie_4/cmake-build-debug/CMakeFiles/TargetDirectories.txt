@@ -1,0 +1,3 @@
+C:/Users/Martin/Repos/FZPH_Zadania/Zadanie_4/cmake-build-debug/CMakeFiles/Zadanie_4.dir
+C:/Users/Martin/Repos/FZPH_Zadania/Zadanie_4/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/Martin/Repos/FZPH_Zadania/Zadanie_4/cmake-build-debug/CMakeFiles/rebuild_cache.dir
