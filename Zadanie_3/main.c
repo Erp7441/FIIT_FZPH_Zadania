@@ -14,15 +14,15 @@
 #define G 9.81
 
 // Input parameters
-//const float start_y = -2.f;
-float vel_0 = 1.f;
-
+float start_y = 0.f;
+float vel_0 = 20.f;
 
 void draw_circle(float x, float y, float z, float scale);
 void draw_circles();
 void update(int i);
 void update_movement(float t);
 void resize(int w, int h);
+float get_land_time();
 
 // Cas
 unsigned int start_time = 0;
@@ -32,8 +32,12 @@ float time_elapsed = 0.f;  // Celkovy cas
 
 float coord_y = 0.f;
 float size = 0.2f;
+float t_d = 0.f;
+float scale = 1.f / 100.f;
+float y = 0.f;
 
-float scale = 0.01f;
+int b_stop = 0;
+int b_printed = 0;
 
 int main(int argc, char **argv)
 {
@@ -42,14 +46,23 @@ int main(int argc, char **argv)
     glutInitWindowSize(1366, 768);
 
     printf("Zadajte vysku:");
-    scanf("%f", &coord_y);
+    scanf("%f", &start_y);
     getchar();
+    start_y--;
 
     printf("Zadajte pociatocnu rychlost:");
     scanf("%f", &vel_0);
     getchar();
 
+//    start_y *= scale;
+//    vel_0 /= scale;
+    coord_y = start_y;
+// 0.5,
+
+    t_d = get_land_time();
+
     glutCreateWindow("OpenGL: Zadanie 3");
+    start_time = glutGet(GLUT_ELAPSED_TIME);
     glutDisplayFunc(&draw_circles);
 
     glutTimerFunc(TIME_STEP, update, 0);
@@ -61,25 +74,46 @@ int main(int argc, char **argv)
 
 void update(const int i)
 {
-    unsigned int current_time = glutGet(GLUT_ELAPSED_TIME);
-    time_elapsed = (float)(current_time - start_time) / 1000.0f;
-
-    elapsed = current_time - last_frame_time;
-
-    if (elapsed > TIME_STEP)
+    if (!b_stop)
     {
-        last_frame_time = current_time - (elapsed % TIME_STEP);
-        glutPostRedisplay();
-    }
+        unsigned int current_time = glutGet(GLUT_ELAPSED_TIME);
+        time_elapsed = (float)(current_time - start_time) / 1000.0f;
 
-    update_movement(time_elapsed);
+        elapsed = current_time - last_frame_time;
+
+        if (elapsed > TIME_STEP)
+        {
+            last_frame_time = current_time - (elapsed % TIME_STEP);
+            glutPostRedisplay();
+        }
+
+        update_movement(time_elapsed);
+    }
+    else if(!b_printed)
+    {
+        glutPostRedisplay();
+//        glutLeaveMainLoop();
+
+        printf("Predpokladany cas dopadu: %f\n", t_d);
+        printf("Cas skoncenia %f\n", time_elapsed);
+        b_printed = 1;
+    }
     glutTimerFunc(TIME_STEP, update, i + 1);
 
 }
 
 void update_movement(float t)
 {
-    coord_y = (float)(vel_0 * t - (1 / 2) * 9.81 * (t * t)) * scale;
+    float val = (float) (start_y + vel_0 * t - 0.5f * G * (t * t));
+
+    coord_y = ((float)val) * scale;
+    y += coord_y;
+
+    printf("Cas: %f, Y: %f\n", t, y);
+    if (y + size <= -1)
+    {
+        b_stop = 1;
+    }
 
 }
 
@@ -123,8 +157,19 @@ void draw_circles()
 {
     glClear(GL_COLOR_BUFFER_BIT);
 
-    glColor3f(0.0f, 0.0f, 1.0f);  // Modra
+    glColor3f(0.0f, 1.0f, 0.0f);  // Zelena
     draw_circle(0.f, coord_y, 0.f, size);
 
     glutSwapBuffers();
+}
+
+float get_land_time()
+{
+    float a = 0.5f * (float)G;
+    float b = vel_0;
+    float c = start_y;
+
+    float t_d1 = (float) (-b + sqrtf(b * b - 4 * a * c)) / (2 * a);
+    float t_d2 = (float) (-b - sqrtf(b * b - 4 * a * c)) / (2 * a);
+    return fmaxf(fabsf(t_d1), fabsf(t_d2));
 }

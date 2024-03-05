@@ -7,4 +7,6 @@ set(CMAKE_C_STANDARD 11)
 
 add_executable(Zadanie_3  main.c)
 #add_executable(Zadanie_3  Jednotka.c)
+#add_executable(Zadanie_3  Test.c)
+#add_executable(Zadanie_3  Test2.c)
 target_link_libraries(Zadanie_3 PRIVATE GLUT::GLUT OpenGL::GL OpenGL::GLU m)
