@@ -8,6 +8,7 @@
 #endif //ZADANIE_4_UTILS_H
 
 #define METERS_COEF 100.f
+#define G 9.81f
 
 #pragma once
 

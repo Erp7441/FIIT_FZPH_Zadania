@@ -16,6 +16,7 @@
 
 void draw_circle(float x, float y, float z, float s)
 {
+    glLoadIdentity();
     glTranslatef(x, y, z);
     glBegin(GL_TRIANGLE_FAN);
     const int NUM_RAYS = 360;
@@ -30,7 +31,7 @@ void draw_circle(float x, float y, float z, float s)
     glEnd();
 }
 
-void draw_quad(float x, float y, float z)
+void draw_quad(float x, float y, float z, float w)
 {
     glLoadIdentity();
 
@@ -38,9 +39,9 @@ void draw_quad(float x, float y, float z)
     glBegin(GL_QUADS);
 
     glVertex3f(0.0f, 0.0f, 0.0f);
-    glVertex3f(0.5f, 0.0f, 0.0f);
-    glVertex3f(0.5f, 0.5f, 0.0f);
-    glVertex3f(0.0f, 0.5f, 0.0f);
+    glVertex3f(w, 0.0f, 0.0f);
+    glVertex3f(w, w, 0.0f);
+    glVertex3f(0.0f, w, 0.0f);
 
     glEnd();
 }

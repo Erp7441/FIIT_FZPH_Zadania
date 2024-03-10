@@ -55,7 +55,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "c:/Users/Martin/Repos/FZPH_Zadania/Zadanie_4/cmake-build-debug"
+			"value" : "c:/Users/Martin/Desktop/FZPH_Zadania/Zadanie_4/cmake-build-debug"
 		},
 		{
 			"name" : "CMAKE_CACHE_MAJOR_VERSION",
@@ -151,11 +151,11 @@
 				},
 				{
 					"name" : "HELPSTRING",
-					"value" : "No help, variable specified on the command line."
+					"value" : "C compiler"
 				}
 			],
-			"type" : "UNINITIALIZED",
-			"value" : "gcc"
+			"type" : "FILEPATH",
+			"value" : "C:/tools/msys64/ucrt64/bin/cc.exe"
 		},
 		{
 			"name" : "CMAKE_C_COMPILER_AR",
@@ -431,7 +431,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "C:/Users/Martin/Repos/FZPH_Zadania/Zadanie_4/cmake-build-debug/CMakeFiles/pkgRedirects"
+			"value" : "C:/Users/Martin/Desktop/FZPH_Zadania/Zadanie_4/cmake-build-debug/CMakeFiles/pkgRedirects"
 		},
 		{
 			"name" : "CMAKE_GENERATOR",
@@ -503,7 +503,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "C:/Users/Martin/Repos/FZPH_Zadania/Zadanie_4"
+			"value" : "C:/Users/Martin/Desktop/FZPH_Zadania/Zadanie_4"
 		},
 		{
 			"name" : "CMAKE_INSTALL_PREFIX",
@@ -543,7 +543,7 @@
 				}
 			],
 			"type" : "FILEPATH",
-			"value" : "C:/PROGRA~2/JETBRA~1/CLION2~1.4/bin/ninja/win/x64/ninja.exe"
+			"value" : "C:/Program Files (x86)/JetBrains/CLion 2023.3.4/bin/ninja/win/x64/ninja.exe"
 		},
 		{
 			"name" : "CMAKE_MODULE_LINKER_FLAGS",
@@ -1739,7 +1739,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "C:/Users/Martin/Repos/FZPH_Zadania/Zadanie_4/cmake-build-debug"
+			"value" : "C:/Users/Martin/Desktop/FZPH_Zadania/Zadanie_4/cmake-build-debug"
 		},
 		{
 			"name" : "Zadanie_4_IS_TOP_LEVEL",
@@ -1763,7 +1763,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "C:/Users/Martin/Repos/FZPH_Zadania/Zadanie_4"
+			"value" : "C:/Users/Martin/Desktop/FZPH_Zadania/Zadanie_4"
 		},
 		{
 			"name" : "_CMAKE_LINKER_PUSHPOP_STATE_SUPPORTED",
