@@ -9,7 +9,9 @@ set(CMAKE_C_STANDARD 11)
 add_executable(Zadanie_4 main.c
         window.h
         shapes.h
-        utils.h)
+        utils.h
+        file.h
+)
 
 
 target_link_libraries(Zadanie_4 PRIVATE GLUT::GLUT OpenGL::GL OpenGL::GLU m)

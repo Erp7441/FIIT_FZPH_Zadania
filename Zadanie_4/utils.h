@@ -10,6 +10,8 @@
 #define METERS_COEF 100.f
 #define G 9.81f
 
+#define DEBUG
+
 #pragma once
 
 void resize(int w, int h) {
@@ -48,4 +50,14 @@ float to_meters(float value)
 float from_meters(float value)
 {
     return value * METERS_COEF;
+}
+
+void printf_debug(const char* format, ...)
+{
+    #ifdef DEBUG
+        va_list args;
+        va_start(args, format);
+        vprintf(format, args);
+        va_end(args);
+    #endif
 }
