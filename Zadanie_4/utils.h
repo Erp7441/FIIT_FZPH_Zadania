@@ -44,3 +44,8 @@ float to_meters(float value)
 {
     return value / METERS_COEF;
 }
+
+float from_meters(float value)
+{
+    return value * METERS_COEF;
+}

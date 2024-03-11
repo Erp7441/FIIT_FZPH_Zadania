@@ -7,6 +7,6 @@
 -- Detecting C compile features - done
 -- Found GLUT: C:/tools/msys64/ucrt64/lib/libfreeglut.dll.a  
 -- Found OpenGL: opengl32   
--- Configuring done (1.5s)
+-- Configuring done (2.2s)
 -- Generating done (0.0s)
 -- Build files have been written to: C:/Users/Martin/Desktop/FZPH_Zadania/Zadanie_4/cmake-build-debug
