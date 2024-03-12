@@ -10,8 +10,6 @@ add_executable(Zadanie_5 main.c
         window.h
         shapes.h
         utils.h
-        file.h
-)
-
+        file.h)
 
 target_link_libraries(Zadanie_5 PRIVATE GLUT::GLUT OpenGL::GL OpenGL::GLU m)

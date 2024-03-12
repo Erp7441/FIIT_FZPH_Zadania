@@ -55,6 +55,7 @@ float from_meters(float value)
 void printf_debug(const char* format, ...)
 {
     #ifdef DEBUG
+        printf("DEBUG: ");
         va_list args;
         va_start(args, format);
         vprintf(format, args);
