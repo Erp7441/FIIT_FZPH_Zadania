@@ -140,7 +140,6 @@ void update(const int i)
 {
     time = display_frame();
 
-    // TODO:: Resetting after game end lags
     // At game end we await user input
     if (game_end)
     {
@@ -300,7 +299,11 @@ void detach_package()
     detach_time = time;
     pack_attached = false;
 
-    angle_rad = curr_angle * (float)(M_PI / 180.f); // TODO:: If autoaim
+    // Auto aiming
+    if (auto_aim)
+    {
+        angle_rad = curr_angle * (float)(M_PI / 180.f);
+    }
 }
 
 void close_game()
