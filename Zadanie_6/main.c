@@ -1,4 +1,3 @@
-
 #include "window.h"
 #include "utils.h"
 #include "shapes.h"
@@ -9,33 +8,36 @@
 #include <GL/freeglut.h>
 #include <stdio.h>
 #include <math.h>
-#include <unistd.h>
 
-#define FPS 60
+//#define BULLET_BOUNDS
 
-// Function definitions
-void draw();
-void update(int i);
 void get_data();
+void draw();
+// Update
+void update(int i);
+void update_bullet(float t);
+void update_package();
+// Collision
 bool collision(float x1, float y1, float x2, float y2, float r1, float r2);
-void key_handler(unsigned char key, int x, int y);
 void check_bounds(float* value, float offset, float bound);
+// Keyboard
+void key_handler(unsigned char key, int x, int y);
+// Calcs
 float calc_distance(float x1, float y1, float x2, float y2);
 float calc_angle(float x1, float y1, float x2, float y2);
+// Utility
 void reset_game(bool hard_reset);
 void detach_package();
 void close_game();
-void update_package();
+
 
 // Input parameters
 float angle = 0.f;  // 45 stupnov
 //float distance = 0.f;  // 250 metrov  // TODO::Remove?
 
+// Time
 float time = 0.f;
 float detach_time = 0.f;
-
-// Global variables
-float angle_rad = 0.f;
 
 // Drone
 float drone_x = 0.f;
@@ -72,6 +74,8 @@ const float window_y_bound = 1.f;
 bool auto_aim = false;  // Auto aim flag
 bool game_end = false;  // Game end flag
 
+float angle_rad = 0.f;
+
 // TODO:: separate files for rounds?
 FILE* data_file = NULL;  // CSV file containing data
 
@@ -80,7 +84,7 @@ int main(int argc, char **argv)
     glutInit(&argc, argv);
 
     // Initializes GLUT window
-    initialize_window(get_data, draw, update, "OpenGL: Zadanie 4", 1366, 768, false);
+    initialize_window(get_data, draw, update, "OpenGL: Zadanie 6", 1366, 768, false);
 
     data_file = open_file("data.csv", "w");
     write_to_file(data_file, "bullet_x,bullet_y,package_x,package_y\n");
@@ -136,6 +140,8 @@ void draw()
     glutSwapBuffers();
 }
 
+
+// Update
 void update(const int i)
 {
     time = display_frame();
@@ -150,6 +156,9 @@ void update(const int i)
     // Update logic
     // Package
     update_package();
+
+    // Bullet
+    if (!pack_attached) update_bullet(time - detach_time);
 
     // Distance and angle update
     if (!game_end)
@@ -168,14 +177,14 @@ void update(const int i)
         game_end = true;
         printf("\nBod stretu:\nbullet_x=%f\nbullet_y=%f\npack_x=%f\npack_y=%f\n\n", bullet_x, bullet_y, pack_x,
                      pack_y);
-        printf("\nr - Reset ( s momentalnou poziciou dronu )\nR - reset\nesc - Ukoncit\n");
+        printf("\nr - Reset ( s momentalnou poziciou dronu )\nR - reset\nG - reset s novym uhlom\nesc - "
+               "Ukoncit\n");
     }
 
     write_to_file(data_file, "%f,%f,%f,%f\n", bullet_x, bullet_y, pack_x, pack_y);
     glutTimerFunc(TIME_STEP, update, i + 1);
 }
 
-// Helper function for updating package position
 void update_package()
 {
     if (!pack_attached)
@@ -185,16 +194,6 @@ void update_package()
 
         // pack_y = pack_s_y + (distance * sinf(angle_rad))  - 0.5f * G * (delta * delta);
         pack_y = pack_s_y  - 0.5f * G * (delta * delta);
-
-        // Bullet update logic
-        float b_v0_x = bullet_vel * cosf(angle_rad);
-        float b_v0_y = bullet_vel * sinf(angle_rad);
-
-        bullet_x = bullet_s_x + b_v0_x * delta;
-        bullet_y = bullet_s_y + b_v0_y * delta - 0.5f * G * (delta * delta);
-        check_bounds(&bullet_x, bullet_size, window_x_bound);
-        check_bounds(&bullet_y, bullet_size, window_y_bound);
-
     }
     else
     {
@@ -202,12 +201,27 @@ void update_package()
         pack_x = drone_x + pack_att_offset_x;
         pack_y = drone_y - pack_att_offset_y;
     }
+
     check_bounds(&pack_x, pack_size, window_x_bound);
     check_bounds(&pack_y, pack_size, window_y_bound);
 }
 
+void update_bullet(float t)
+{
+    float b_v0_x = bullet_vel * cosf(angle_rad);
+    float b_v0_y = bullet_vel * sinf(angle_rad);
 
-// Collision detection
+    bullet_x = bullet_s_x + b_v0_x * t;
+    bullet_y = bullet_s_y + b_v0_y * t - 0.5f * G * (t * t);
+
+    #ifdef BULLET_BOUNDS
+        check_bounds(&bullet_x, bullet_size, window_x_bound);
+        check_bounds(&bullet_y, bullet_size, window_y_bound);
+    #endif
+}
+
+
+// Collision
 bool collision(float x1, float y1, float x2, float y2, float d1, float d2)
 {
     float distX = x1 - x2;
@@ -252,6 +266,10 @@ void key_handler(unsigned char key, int x, int y)
             reset_game(false);
             break;
         case 'R':
+            reset_game(true);
+            break;
+        case 'G':
+            get_data();
             reset_game(true);
             break;
         case 27: // Esc
