@@ -1,0 +1,4 @@
+ToolSet: 12.0 w64 (local)@C:\tools\msys64\ucrt64
+Options: 
+
+Options:-DCMAKE_C_COMPILER=gcc
