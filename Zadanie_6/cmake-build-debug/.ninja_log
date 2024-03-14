@@ -1,21 +1,6 @@
 # ninja log v5
-1	458	7320736635945904	build.ninja	6e12634250fd4b00
-3154	3746	7319425059987166	Zadanie_4.exe	6f6783cc609921a7
-4	774	7320732680157105	CMakeFiles/Zadanie_6.dir/main.c.obj	a8033d9c7fef886d
-775	900	7320732681390843	Zadanie_6.exe	faeb1fafb693aaa2
-1	723	7320737010012894	CMakeFiles/Zadanie_6.dir/main.c.obj	a8033d9c7fef886d
-724	862	7320737011383205	Zadanie_6.exe	faeb1fafb693aaa2
-3	700	7320737993538040	CMakeFiles/Zadanie_6.dir/main.c.obj	a8033d9c7fef886d
-700	828	7320737994781348	Zadanie_6.exe	faeb1fafb693aaa2
-4	716	7320738521602913	CMakeFiles/Zadanie_6.dir/main.c.obj	a8033d9c7fef886d
-717	849	7320738522876528	Zadanie_6.exe	faeb1fafb693aaa2
-3	702	7320739556460525	CMakeFiles/Zadanie_6.dir/main.c.obj	a8033d9c7fef886d
-702	825	7320739557666877	Zadanie_6.exe	faeb1fafb693aaa2
-5	731	7320739775043880	CMakeFiles/Zadanie_6.dir/main.c.obj	a8033d9c7fef886d
-731	864	7320739776352528	Zadanie_6.exe	faeb1fafb693aaa2
-4	784	7320743094628803	CMakeFiles/Zadanie_6.dir/main.c.obj	a8033d9c7fef886d
-785	914	7320743095875323	Zadanie_6.exe	faeb1fafb693aaa2
-3	708	7320743700422366	CMakeFiles/Zadanie_6.dir/main.c.obj	a8033d9c7fef886d
-708	833	7320743701745758	Zadanie_6.exe	faeb1fafb693aaa2
-3	708	7320747124855841	CMakeFiles/Zadanie_6.dir/main.c.obj	a8033d9c7fef886d
-708	838	7320747126135000	Zadanie_6.exe	faeb1fafb693aaa2
+1	458	7321427723027895	build.ninja	6e12634250fd4b00
+3	725	7321424131448878	CMakeFiles/Zadanie_6.dir/main.c.obj	a8033d9c7fef886d
+726	852	7321424132766989	Zadanie_6.exe	faeb1fafb693aaa2
+3	757	7321428599495623	CMakeFiles/Zadanie_6.dir/main.c.obj	a8033d9c7fef886d
+757	887	7321428600768316	Zadanie_6.exe	faeb1fafb693aaa2

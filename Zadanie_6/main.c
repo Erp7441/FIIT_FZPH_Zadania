@@ -8,7 +8,11 @@
 #include <GL/freeglut.h>
 #include <stdio.h>
 #include <math.h>
+#include <time.h>
+#include <sys/time.h>
+#include <string.h>
 
+#define BUFFER_SIZE 256
 //#define BULLET_BOUNDS
 
 void get_data();
@@ -29,14 +33,14 @@ float calc_angle(float x1, float y1, float x2, float y2);
 void reset_game(bool hard_reset);
 void detach_package();
 void close_game();
+char* generate_file_path(char* path);
 
 
 // Input parameters
 float angle = 0.f;  // 45 stupnov
-//float distance = 0.f;  // 250 metrov  // TODO::Remove?
 
 // Time
-float time = 0.f;
+float anim_time = 0.f;
 float detach_time = 0.f;
 
 // Drone
@@ -76,7 +80,6 @@ bool game_end = false;  // Game end flag
 
 float angle_rad = 0.f;
 
-// TODO:: separate files for rounds?
 FILE* data_file = NULL;  // CSV file containing data
 
 int main(int argc, char **argv)
@@ -86,9 +89,7 @@ int main(int argc, char **argv)
     // Initializes GLUT window
     initialize_window(get_data, draw, update, "OpenGL: Zadanie 6", 1366, 768, false);
 
-    data_file = open_file("data.csv", "w");
-    write_to_file(data_file, "bullet_x,bullet_y,package_x,package_y\n");
-
+    // Sets keyboard handler
     glutKeyboardFunc(key_handler);
 
     // Reshapes objects based on window size
@@ -111,14 +112,17 @@ void get_data()
         getchar();
     }
 
-//    distance = get_meters("Zadajte vzdialenost:\n");  // TODO:: Remove
-
     angle_rad = angle * (float)(M_PI / 180.f);
 
     bullet_x = bullet_s_x;
     bullet_y = bullet_s_y;
     drone_x = drone_s_x;
     drone_y = drone_s_y;
+
+
+    data_file = open_file(generate_file_path("../data.csv"), "w");
+    write_to_file(data_file, "bullet_x,bullet_y,package_x,package_y\n");
+
 
     printf("Press any key to start...\n");
     getchar();
@@ -144,7 +148,7 @@ void draw()
 // Update
 void update(const int i)
 {
-    time = display_frame();
+    anim_time = display_frame();
 
     // At game end we await user input
     if (game_end)
@@ -158,7 +162,7 @@ void update(const int i)
     update_package();
 
     // Bullet
-    if (!pack_attached) update_bullet(time - detach_time);
+    if (!pack_attached) update_bullet(anim_time - detach_time);
 
     // Distance and angle update
     if (!game_end)
@@ -175,10 +179,9 @@ void update(const int i)
     if (!game_end && collision(bullet_x, bullet_y, pack_x, pack_y, bullet_size, pack_size))
     {
         game_end = true;
-        printf("\nBod stretu:\nbullet_x=%f\nbullet_y=%f\npack_x=%f\npack_y=%f\n\n", bullet_x, bullet_y, pack_x,
-                     pack_y);
-        printf("\nr - Reset ( s momentalnou poziciou dronu )\nR - reset\nG - reset s novym uhlom\nesc - "
-               "Ukoncit\n");
+        printf("\nBod stretu:\nbullet_x=%f\nbullet_y=%f\npack_x=%f\npack_y=%f\n\n", bullet_x, bullet_y, pack_x, pack_y);
+        printf("\nr - Reset ( s momentalnou poziciou dronu )\nR - reset\nG - reset s novym uhlom\nesc - Ukoncit\n");
+        write_to_file(data_file, "bullet_x,bullet_y,package_x,package_y\n");
     }
 
     write_to_file(data_file, "%f,%f,%f,%f\n", bullet_x, bullet_y, pack_x, pack_y);
@@ -190,7 +193,7 @@ void update_package()
     if (!pack_attached)
     {
         // Package fall logic
-        float delta = time - detach_time;
+        float delta = anim_time - detach_time;
 
         // pack_y = pack_s_y + (distance * sinf(angle_rad))  - 0.5f * G * (delta * delta);
         pack_y = pack_s_y  - 0.5f * G * (delta * delta);
@@ -303,7 +306,7 @@ void reset_game(bool hard_reset)
     if (!hard_reset) return;
     drone_x = drone_s_x;
     drone_y = drone_s_y;
-    time = 0.f;
+    anim_time = 0.f;
     detach_time = 0.f;
     curr_dist = 0.f;
     curr_angle = 0.f;
@@ -314,7 +317,7 @@ void detach_package()
     if (!pack_attached) return;
     pack_s_x = pack_x;
     pack_s_y = pack_y;
-    detach_time = time;
+    detach_time = anim_time;
     pack_attached = false;
 
     // Auto aiming
@@ -332,4 +335,40 @@ void close_game()
     printf("Data zapisane do subora!\n");
 
     glutLeaveMainLoop();
+}
+
+char* generate_file_path(char* path)
+{
+    char base_name[BUFFER_SIZE] = {0};
+    char extension[BUFFER_SIZE] = {0};
+    char* generated_name = (char*) calloc(BUFFER_SIZE, sizeof(char));
+    const char* dot = strrchr(path, '.');
+
+    time_t raw_time;
+    struct tm* time_info;
+    struct timeval tv;
+    time(&raw_time);
+    time_info = localtime(&raw_time);
+    gettimeofday(&tv, NULL);
+
+    if (dot != NULL)
+    {
+        strncpy(base_name, path, dot - path);
+        base_name[dot - path] = '\0';
+        strcpy(extension, dot);
+    }
+    else
+    {
+        strcpy(base_name, path);
+        strcpy(extension, "");
+    }
+
+    snprintf(
+        generated_name, BUFFER_SIZE, "%s_%02d-%02d-%04d_%02d-%02d-%02d-%03ld%s",
+        base_name, time_info->tm_mday, time_info->tm_mon + 1,
+        time_info->tm_year + 1900, time_info->tm_hour,
+        time_info->tm_min, time_info->tm_sec, tv.tv_usec/1000, extension
+    );
+
+    return generated_name;
 }
