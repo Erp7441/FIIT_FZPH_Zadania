@@ -75,12 +75,15 @@ const float window_x_bound = 1.77f;
 const float window_y_bound = 1.f;
 
 // Game
-bool auto_aim = false;  // Auto aim flag
-bool game_end = false;  // Game end flag
+bool auto_aim = false;
+bool game_end = false;
 
 float angle_rad = 0.f;
 
+// File
+char data_header[] = "bullet_x,bullet_y,package_x,package_y,time\n";
 FILE* data_file = NULL;  // CSV file containing data
+
 
 int main(int argc, char **argv)
 {
@@ -121,7 +124,7 @@ void get_data()
 
 
     data_file = open_file(generate_file_path("../data.csv"), "w");
-    write_to_file(data_file, "bullet_x,bullet_y,package_x,package_y\n");
+    write_to_file(data_file, data_header);
 
 
     printf("Press any key to start...\n");
@@ -181,10 +184,9 @@ void update(const int i)
         game_end = true;
         printf("\nBod stretu:\nbullet_x=%f\nbullet_y=%f\npack_x=%f\npack_y=%f\n\n", bullet_x, bullet_y, pack_x, pack_y);
         printf("\nr - Reset ( s momentalnou poziciou dronu )\nR - reset\nG - reset s novym uhlom\nesc - Ukoncit\n");
-        write_to_file(data_file, "bullet_x,bullet_y,package_x,package_y\n");
     }
 
-    write_to_file(data_file, "%f,%f,%f,%f\n", bullet_x, bullet_y, pack_x, pack_y);
+    if (!game_end) write_to_file(data_file, "%f,%f,%f,%f,%f\n", bullet_x, bullet_y, pack_x, pack_y, anim_time);
     glutTimerFunc(TIME_STEP, update, i + 1);
 }
 
@@ -300,6 +302,7 @@ float calc_angle(float x1, float y1, float x2, float y2)
 void reset_game(bool hard_reset)
 {
     game_end = false;
+    write_to_file(data_file, data_header);
     pack_attached = true;
     bullet_x = bullet_s_x;
     bullet_y = bullet_s_y;
