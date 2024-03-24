@@ -199,6 +199,9 @@ void update(const int i)
         printf("\nr - Reset ( s momentalnou poziciou dronu )\nR - reset\nG - reset s novym uhlom\nesc - Ukoncit\n");
     }
 
+    printf("drone_z=%f\n", drone_z);
+    printf("pack_z=%f\n", pack_z);
+
     if (!game_end) write_to_file(data_file, "%f,%f,%f,%f,%f,%f,%f\n", bullet_x, bullet_y, pack_x, pack_y, anim_time);
     glutTimerFunc(TIME_STEP, update, i + 1);
 }
@@ -220,7 +223,7 @@ void update_package()
     }
 
     check_bounds(&pack_x, pack_size, bound_max_x, bound_min_x);
-    check_bounds(&pack_y, pack_size, bound_max_y, bound_min_y);
+    check_bounds(&pack_y, pack_size, bound_max_y, bound_min_y+pack_size);
     check_bounds(&pack_z, pack_size, bound_max_z, bound_min_z);
 }
 
@@ -236,7 +239,7 @@ void update_bullet(float t)
 
 #ifdef BULLET_BOUNDS
     check_bounds(&bullet_x, bullet_size, bound_max_x, bound_min_x);
-    check_bounds(&bullet_y, bullet_size, bound_max_y, bound_min_y);
+    check_bounds(&bullet_y, bullet_size, bound_max_y, bound_min_y+bullet_size);
     check_bounds(&bullet_z, bullet_size, bound_max_z, bound_min_z);
 #endif
 }
@@ -313,7 +316,7 @@ void key_handler(unsigned char key, int x, int y) {
     switch (key) {
         case 'w':
             drone_y += to_meters(1.f);
-            check_bounds(&drone_y, drone_size, bound_max_y, bound_min_y);
+            check_bounds(&drone_y, drone_size, bound_max_y, bound_min_y+drone_size);
             break;
         case 'a':
             drone_x += to_meters(1.f);
@@ -321,7 +324,7 @@ void key_handler(unsigned char key, int x, int y) {
             break;
         case 's':
             drone_y -= to_meters(1.f);
-            check_bounds(&drone_y, drone_size, bound_max_y, bound_min_y);
+            check_bounds(&drone_y, drone_size, bound_max_y, bound_min_y+drone_size);
             break;
         case 'd':
             drone_x -= to_meters(1.f);
@@ -401,8 +404,8 @@ void mouse_wheel_handler(int wheel, int direction, int x, int y)
 
 void check_bounds(float* value, float offset, float max_bound, float min_bound)
 {
-    if (*value+offset >= max_bound) *value = max_bound - offset;
-    else if (*value+offset <= min_bound) *value = min_bound + offset;
+    if (*value+offset >= max_bound + offset) *value = max_bound;
+    else if (*value+offset <= min_bound + offset) *value = min_bound;
 }
 
 // Collision
