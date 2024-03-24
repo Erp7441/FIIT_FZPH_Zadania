@@ -14,6 +14,7 @@
 #include <string.h>
 
 #define BUFFER_SIZE 256
+#define GAME_MODE
 //#define BULLET_BOUNDS
 
 void get_data();
@@ -191,6 +192,7 @@ void update(const int i)
         }
     }
 
+#ifdef GAME_MODE
     // Check collision
     if (!game_end && collision(bullet_x, bullet_y, bullet_z, pack_x, pack_y, pack_z, bullet_size, pack_size))
     {
@@ -198,6 +200,7 @@ void update(const int i)
         printf("\nBod stretu:\nbullet_x=%f\nbullet_y=%f\npack_x=%f\npack_y=%f\n\n", bullet_x, bullet_y, pack_x, pack_y);
         printf("\nr - Reset ( s momentalnou poziciou dronu )\nR - reset\nG - reset s novym uhlom\nesc - Ukoncit\n");
     }
+#endif
 
     if (!game_end) write_to_file(data_file, "%f,%f,%f,%f,%f,%f,%f\n", bullet_x, bullet_y, pack_x, pack_y, anim_time);
     glutTimerFunc(TIME_STEP, update, i + 1);
@@ -243,7 +246,9 @@ void update_bullet(float t)
 
 void get_data()
 {
+#ifdef GAME_MODE
     auto_aim = get_confirmation("Zapnut auto-aim? (y/n)\n");
+#endif
 
     if (!auto_aim)
     {
@@ -253,6 +258,10 @@ void get_data()
 
         printf("Zadajte uhol elevacie v stupnoch:\n");
         scanf("%f", &elevation);
+        getchar();
+
+        printf("Zadajte rychlost v m/s:\n");
+        scanf("%f", &bullet_vel);
         getchar();
     }
 
@@ -297,12 +306,14 @@ void draw()
 
     draw_axes(100.0f, 0.f, 0.f, 0.f);
 
+#ifdef GAME_MODE
     glColor3f(0.3f, 0.5f, 0.1f);
     draw_cube(2.51f, 0.f, 2.51f, 5.f, 0.f, 5.f);
     draw_cube_edges(2.51f, 1.f, 2.51f, 2.51f, 1.f, 2.51f);
 
     draw_ball_fade(pack_x, pack_y, pack_z, pack_size, 0.f, 1.f, 0.f);
     draw_ball_fade(drone_x, drone_y, drone_z, drone_size, 0.f, 0.f, 1.f);
+#endif
     draw_ball_fade(bullet_x, bullet_y, bullet_z, bullet_size, 1.f, 0.f, 0.f);
 
     glutSwapBuffers();
@@ -438,7 +449,8 @@ float calc_elevation(float x1, float y1, float z1, float x2, float y2, float z2)
 
 float calc_velocity(float dist, float height, float elev)
 {
-    return 7.f;
+    if (!auto_aim) return bullet_vel;
+    return bullet_vel;
     // TODO:: Figure out or set to fixed value
 
     printf("curr_dist=%f\n", curr_dist);
