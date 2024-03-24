@@ -199,9 +199,6 @@ void update(const int i)
         printf("\nr - Reset ( s momentalnou poziciou dronu )\nR - reset\nG - reset s novym uhlom\nesc - Ukoncit\n");
     }
 
-    printf("drone_z=%f\n", drone_z);
-    printf("pack_z=%f\n", pack_z);
-
     if (!game_end) write_to_file(data_file, "%f,%f,%f,%f,%f,%f,%f\n", bullet_x, bullet_y, pack_x, pack_y, anim_time);
     glutTimerFunc(TIME_STEP, update, i + 1);
 }
