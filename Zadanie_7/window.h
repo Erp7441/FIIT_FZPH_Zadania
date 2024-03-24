@@ -18,7 +18,7 @@ unsigned int elapsed = 0;  // Cas framu
 float time_elapsed = 0.f;  // Celkovy cas
 
 
-void display_frame()
+float display_frame()
 {
     unsigned int current_time = glutGet(GLUT_ELAPSED_TIME);
     time_elapsed = (float)(current_time - start_time) / 1000.0f;
@@ -30,17 +30,20 @@ void display_frame()
         last_frame_time = current_time - (elapsed % TIME_STEP);
         glutPostRedisplay();
     }
+
+    return time_elapsed;
 }
 
 void initialize_window(void(*get_data)(void), void(*draw)(void), void(*update)(int), char* title)
 {
-    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
+    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
     glutInitWindowSize(1920, 1080);
     glutInitWindowPosition(0, 0);
 
     get_data();
 
     glutCreateWindow(title);
+    glEnable(GL_DEPTH_TEST);
     glutFullScreen();
     glutDisplayFunc(draw);
 

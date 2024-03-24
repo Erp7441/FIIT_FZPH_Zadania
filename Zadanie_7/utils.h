@@ -2,12 +2,16 @@
 #include <GL/glut.h>
 #include <GL/freeglut.h>
 #include <stdio.h>
+#include <stdbool.h>
 
-#ifndef ZADANIE_4_UTILS_H
-#define ZADANIE_4_UTILS_H
-#endif //ZADANIE_4_UTILS_H
+#ifndef ZADANIE_7_UTILS_H
+#define ZADANIE_7_UTILS_H
+#endif //ZADANIE_7_UTILS_H
 
 #define METERS_COEF 100.f
+#define G 9.81f
+
+#define DEBUG
 
 #pragma once
 
@@ -39,7 +43,31 @@ float get_meters(char* prompt)
     return value / (METERS_COEF);
 }
 
+bool get_confirmation(char* prompt)
+{
+    char answer = 'n';
+    printf(prompt);
+    scanf("%c", &answer);
+    getchar();
+    return answer == 'y';
+}
+
 float to_meters(float value)
 {
     return value / METERS_COEF;
+}
+
+float from_meters(float value)
+{
+    return value * METERS_COEF;
+}
+
+void printf_debug(const char* format, ...)
+{
+    #ifdef DEBUG
+        va_list args;
+        va_start(args, format);
+        vprintf(format, args);
+        va_end(args);
+    #endif
 }
