@@ -1,3 +1,3 @@
-C:/Users/Martin/Desktop/FZPH_Zadania/Zadanie_5/cmake-build-debug/CMakeFiles/Zadanie_5.dir
-C:/Users/Martin/Desktop/FZPH_Zadania/Zadanie_5/cmake-build-debug/CMakeFiles/edit_cache.dir
-C:/Users/Martin/Desktop/FZPH_Zadania/Zadanie_5/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+C:/Users/Martin/Repos/FZPH_Zadania/Zadanie_5/cmake-build-debug/CMakeFiles/Zadanie_5.dir
+C:/Users/Martin/Repos/FZPH_Zadania/Zadanie_5/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/Martin/Repos/FZPH_Zadania/Zadanie_5/cmake-build-debug/CMakeFiles/rebuild_cache.dir

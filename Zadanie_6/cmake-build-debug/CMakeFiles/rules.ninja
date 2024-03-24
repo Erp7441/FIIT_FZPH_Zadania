@@ -17,7 +17,7 @@
 rule C_COMPILER__Zadanie_6_unscanned_Debug
   depfile = $DEP_FILE
   deps = gcc
-  command = ${LAUNCHER}${CODE_CHECK}C:\tools\msys64\ucrt64\bin\cc.exe $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out -c $in
+  command = ${LAUNCHER}${CODE_CHECK}C:\tools\msys64\ucrt64\bin\gcc.exe $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out -c $in
   description = Building C object $out
 
 
@@ -25,7 +25,7 @@ rule C_COMPILER__Zadanie_6_unscanned_Debug
 # Rule for linking C executable.
 
 rule C_EXECUTABLE_LINKER__Zadanie_6_Debug
-  command = cmd.exe /C "$PRE_LINK && C:\tools\msys64\ucrt64\bin\cc.exe $FLAGS $LINK_FLAGS $in -o $TARGET_FILE -Wl,--out-implib,$TARGET_IMPLIB -Wl,--major-image-version,0,--minor-image-version,0 $LINK_PATH $LINK_LIBRARIES && $POST_BUILD"
+  command = cmd.exe /C "$PRE_LINK && C:\tools\msys64\ucrt64\bin\gcc.exe $FLAGS $LINK_FLAGS $in -o $TARGET_FILE -Wl,--out-implib,$TARGET_IMPLIB -Wl,--major-image-version,0,--minor-image-version,0 $LINK_PATH $LINK_LIBRARIES && $POST_BUILD"
   description = Linking C executable $TARGET_FILE
   restat = $RESTAT
 
@@ -42,7 +42,7 @@ rule CUSTOM_COMMAND
 # Rule for re-running cmake.
 
 rule RERUN_CMAKE
-  command = "C:\Program Files (x86)\JetBrains\CLion 2023.3.4\bin\cmake\win\x64\bin\cmake.exe" --regenerate-during-build -SC:\Users\Martin\Desktop\FZPH_Zadania\Zadanie_6 -BC:\Users\Martin\Desktop\FZPH_Zadania\Zadanie_6\cmake-build-debug
+  command = "C:\Program Files (x86)\JetBrains\CLion 2023.3.4\bin\cmake\win\x64\bin\cmake.exe" --regenerate-during-build -SC:\Users\Martin\Repos\FZPH_Zadania\Zadanie_6 -BC:\Users\Martin\Repos\FZPH_Zadania\Zadanie_6\cmake-build-debug
   description = Re-running CMake...
   generator = 1
 
