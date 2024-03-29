@@ -31,17 +31,19 @@ void draw_circle(float x, float y, float z, float s)
     glEnd();
 }
 
-void draw_quad(float x, float y, float z, float w)
+void draw_quad(float x, float y, float z, float w, float r)
 {
     glLoadIdentity();
 
     glTranslatef(x, y, z);
+    glRotatef(r, 0.0f, 0.0f, 1.0f);
     glBegin(GL_QUADS);
 
     glVertex3f(0.0f, 0.0f, 0.0f);
     glVertex3f(w, 0.0f, 0.0f);
     glVertex3f(w, w, 0.0f);
     glVertex3f(0.0f, w, 0.0f);
+    glRotatef(0.0f, 0.0f, 0.0f, 1.0f);
 
     glEnd();
 }

@@ -13,28 +13,43 @@
 #include <sys/time.h>
 #include <string.h>
 
-#define BUFFER_SIZE 256
-#define GAME_MODE
-//#define BULLET_BOUNDS
+
+#define FPS 360
+
 
 void get_data();
 void draw();
 // Update
 void update(int i);
+void keyboard_handler(unsigned char key, int x, int y);
 
 
 
 // Input parameters
-float slope_angle = 45.f;
+float slope_angle = 30.f;
 float slope_angle_rad = 0.f;
 float engine_force = 10.f;
-float quad_mass = 0.5f;
-float friction = 0.5f;
+float friction = 0.4f;
+float max_velocity = 4.f;
+
+// Globals
+float slope_length = 100.f;
+
 
 float quad_x = 0.f;
 float quad_y = 0.f;
+float quad_w = 0.05f;
+float quad_mass = 0.5f;
+float quad_vel = 0.f;
+
+float motor_turn_off_line_x = 0.f;
+float motor_turn_off_line_y = 0.f;
+float motor_turn_off_line_length = 100.f;
 
 float anim_time = 0.f;
+
+bool start = false;
+bool max_vel_reached = false;
 
 int main(int argc, char **argv)
 {
@@ -46,6 +61,9 @@ int main(int argc, char **argv)
     // Reshapes objects based on window size
     glutReshapeFunc(resize);
 
+    // Keyboard handler
+    glutKeyboardFunc(keyboard_handler);
+
     // Starts GLUT main loop
     start_animation();
 
@@ -54,17 +72,39 @@ int main(int argc, char **argv)
 
 void update(const int i)
 {
+    if(!start)
+    {
+        glutTimerFunc(TIME_STEP, update, i + 1);
+        return;
+    }
+
     anim_time = display_frame();
 
     float quad_g_force = quad_mass * G;
-    float force_t = friction * quad_g_force * cosf(slope_angle_rad);
-    float force_n = quad_g_force * sinf(slope_angle_rad);
-    float acc = (engine_force - force_n - force_t) / quad_mass;
+    float force_t = friction * quad_g_force * cosf(slope_angle_rad);  // F_t
+    float force_n = quad_g_force * sinf(slope_angle_rad);  // F_g
+    float force_net = engine_force - force_n - force_t;  // F
+    float acc = force_net / quad_mass;
+
+    if (!max_vel_reached) quad_vel = acc * anim_time;  // Derivacia vzorca x' (resp. x2 v kode)
+    if (quad_vel > max_velocity && engine_force != 0)
+    {
+        motor_turn_off_line_x = quad_x;
+        motor_turn_off_line_y = quad_y;
+        engine_force = 0.f;
+        max_vel_reached = true;
+        printf("Max velocity reached!\n");
+    }
 
     float x2 = 0.5f * acc * (anim_time * anim_time);
+    if (max_vel_reached) x2 += to_meters(quad_mass*quad_vel);
 
     quad_x = x2 * cosf(slope_angle_rad);
     quad_y = x2 * sinf(slope_angle_rad);
+
+
+    if(quad_x < 0.f) quad_x = 0.f;
+    if(quad_y < 0.f) quad_y = 0.f;
 
     glutTimerFunc(TIME_STEP, update, i + 1);
 }
@@ -74,8 +114,7 @@ void get_data()
 
     slope_angle_rad = slope_angle * (float)M_PI / 180.f;
 
-    printf("Press any key to start...\n");
-    getchar();
+    printf("Press Shift+A to start the animation...\n");
 }
 
 void draw()
@@ -83,12 +122,47 @@ void draw()
     glClear(GL_COLOR_BUFFER_BIT);
 
 
-    draw_quad(quad_x*cosf(slope_angle_rad), quad_y*sinf(slope_angle_rad), 0.f, 0.5f);
+    if (max_vel_reached)
+    {
+        glColor3f(1.f, 0.f, 0.f);
+        draw_slope_line(
+                motor_turn_off_line_x,
+                motor_turn_off_line_y,
+                motor_turn_off_line_length,
+                -slope_angle / 4
+            );
+        glColor3f(1.f, 0.f, 0.f);
+    }
+    else glColor3f(0.f, 1.f, 0.f);
+    draw_quad(
+            quad_x*cosf(slope_angle_rad),
+            quad_y*sinf(slope_angle_rad),
+            0.f,
+            quad_w,
+            slope_angle
+    );
 
-    draw_slope_line(0, 0, 100, slope_angle);
-
-    draw_axes();
+    glColor3f(1.f, 1.f, 0.f);
+    draw_slope_line(0, 0, slope_length, slope_angle);
 
 
     glutSwapBuffers();
+}
+
+
+void keyboard_handler(unsigned char key, int x, int y)
+{
+    switch (key)
+    {
+        case 'A':
+            if (start) break;
+            printf("Animation started!\n");
+            start = true;
+            start_time = glutGet(GLUT_ELAPSED_TIME);
+            break;
+        case 27:
+            exit(0);
+        default:
+            break;
+    }
 }
