@@ -66,6 +66,18 @@ void draw_axes()
 
 void draw_slope_line(float x, float y, float length, float angle)
 {
+    float radianAngle = angle * M_PI / 180.0f;  // Convert angle to radians
+    float x2 = x + length * cos(radianAngle);
+    float y2 = y + length * sin(radianAngle);
+
+    glLoadIdentity();
+    glBegin(GL_LINES);
+    glVertex2f(x, y);  // Starting point of the line
+    glVertex2f(x2, y2);  // Ending point of the line
+    glEnd();
+
+    return;
+
     glLoadIdentity();
     glTranslatef(x, y, 0.0f);
     glRotatef(angle, 0.0f, 0.0f, 1.0f);

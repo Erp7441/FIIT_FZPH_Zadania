@@ -41,6 +41,7 @@ float quad_y = 0.f;
 float quad_w = 0.05f;
 float quad_mass = 0.5f;
 float quad_vel = 0.f;
+float x2 = 0.f;
 
 float motor_turn_off_line_x = 0.f;
 float motor_turn_off_line_y = 0.f;
@@ -72,13 +73,13 @@ int main(int argc, char **argv)
 
 void update(const int i)
 {
+    anim_time = display_frame();
     if(!start)
     {
         glutTimerFunc(TIME_STEP, update, i + 1);
         return;
     }
 
-    anim_time = display_frame();
 
     float quad_g_force = quad_mass * G;
     float force_t = friction * quad_g_force * cosf(slope_angle_rad);  // F_t
@@ -96,12 +97,11 @@ void update(const int i)
         printf("Max velocity reached!\n");
     }
 
-    float x2 = 0.5f * acc * (anim_time * anim_time);
+    x2 += to_meters(0.5f * acc * (anim_time * anim_time));
     if (max_vel_reached) x2 += to_meters(quad_mass*quad_vel);
 
     quad_x = x2 * cosf(slope_angle_rad);
     quad_y = x2 * sinf(slope_angle_rad);
-
 
     if(quad_x < 0.f) quad_x = 0.f;
     if(quad_y < 0.f) quad_y = 0.f;
@@ -111,6 +111,22 @@ void update(const int i)
 
 void get_data()
 {
+
+    printf("Enter slope angle (30):");
+    scanf("%f", &slope_angle);
+    getchar();
+
+    printf("Enter engine force (10):");
+    scanf("%f", &engine_force);
+    getchar();
+
+    printf("Enter friction coeficient (0.4):");
+    scanf("%f", &friction);
+    getchar();
+
+    printf("Enter max velocity (4):");
+    scanf("%f", &max_velocity);
+    getchar();
 
     slope_angle_rad = slope_angle * (float)M_PI / 180.f;
 
@@ -129,14 +145,14 @@ void draw()
                 motor_turn_off_line_x,
                 motor_turn_off_line_y,
                 motor_turn_off_line_length,
-                -slope_angle / 4
+                slope_angle + 90
             );
         glColor3f(1.f, 0.f, 0.f);
     }
     else glColor3f(0.f, 1.f, 0.f);
     draw_quad(
-            quad_x*cosf(slope_angle_rad),
-            quad_y*sinf(slope_angle_rad),
+            quad_x,
+            quad_y,
             0.f,
             quad_w,
             slope_angle
