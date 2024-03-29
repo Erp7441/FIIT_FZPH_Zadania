@@ -9,9 +9,6 @@
 #include <GL/freeglut.h>
 #include <stdio.h>
 #include <math.h>
-#include <time.h>
-#include <sys/time.h>
-#include <string.h>
 
 
 #define FPS 360
@@ -24,7 +21,6 @@ void update(int i);
 void keyboard_handler(unsigned char key, int x, int y);
 
 
-
 // Input parameters
 float slope_angle = 30.f;
 float slope_angle_rad = 0.f;
@@ -35,13 +31,14 @@ float max_velocity = 4.f;
 // Globals
 float slope_length = 100.f;
 
-
 float quad_x = 0.f;
 float quad_y = 0.f;
 float quad_w = 0.05f;
 float quad_mass = 0.5f;
 float quad_vel = 0.f;
 float x2 = 0.f;
+float prev_quad_x = -1.f;
+float prev_quad_y = -1.f;
 
 float motor_turn_off_line_x = 0.f;
 float motor_turn_off_line_y = 0.f;
@@ -51,6 +48,9 @@ float anim_time = 0.f;
 
 bool start = false;
 bool max_vel_reached = false;
+
+char data_header[] = "quad_x,quad_y,time,max_vel_reached\n";
+FILE* data_file = NULL;  // CSV file containing data
 
 int main(int argc, char **argv)
 {
@@ -80,7 +80,6 @@ void update(const int i)
         return;
     }
 
-
     float quad_g_force = quad_mass * G;
     float force_t = friction * quad_g_force * cosf(slope_angle_rad);  // F_t
     float force_n = quad_g_force * sinf(slope_angle_rad);  // F_g
@@ -106,6 +105,13 @@ void update(const int i)
     if(quad_x < 0.f) quad_x = 0.f;
     if(quad_y < 0.f) quad_y = 0.f;
 
+    if (quad_x != prev_quad_x || quad_y != prev_quad_y)
+    {
+        write_to_file(data_file, "%f,%f,%f,%s\n", quad_x, quad_y, anim_time, max_vel_reached ? "true" : "false");
+        prev_quad_x = quad_x;
+        prev_quad_y = quad_y;
+    }
+
     glutTimerFunc(TIME_STEP, update, i + 1);
 }
 
@@ -120,7 +126,7 @@ void get_data()
     scanf("%f", &engine_force);
     getchar();
 
-    printf("Enter friction coeficient (0.4):");
+    printf("Enter friction coeficient (0.6):");
     scanf("%f", &friction);
     getchar();
 
@@ -129,6 +135,9 @@ void get_data()
     getchar();
 
     slope_angle_rad = slope_angle * (float)M_PI / 180.f;
+
+    data_file = open_file(generate_file_path("../data.csv"), "w");
+    write_to_file(data_file, data_header);
 
     printf("Press Shift+A to start the animation...\n");
 }
@@ -150,13 +159,7 @@ void draw()
         glColor3f(1.f, 0.f, 0.f);
     }
     else glColor3f(0.f, 1.f, 0.f);
-    draw_quad(
-            quad_x,
-            quad_y,
-            0.f,
-            quad_w,
-            slope_angle
-    );
+    draw_quad(quad_x, quad_y, 0.f, quad_w, slope_angle);
 
     glColor3f(1.f, 1.f, 0.f);
     draw_slope_line(0, 0, slope_length, slope_angle);
@@ -177,6 +180,8 @@ void keyboard_handler(unsigned char key, int x, int y)
             start_time = glutGet(GLUT_ELAPSED_TIME);
             break;
         case 27:
+            printf("Exiting...\n");
+            close_file(data_file);
             exit(0);
         default:
             break;

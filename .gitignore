@@ -1,3 +1,6 @@
+### Misc ###
+data_*.csv
+
 ### C ###
 # Prerequisites
 *.d
