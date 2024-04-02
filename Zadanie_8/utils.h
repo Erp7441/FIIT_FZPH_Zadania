@@ -10,6 +10,8 @@
 #define METERS_COEF 100.f
 #define G 9.81f
 
+#define BUFFER_SIZE 256
+
 #define DEBUG
 
 #pragma once
@@ -42,13 +44,35 @@ float get_meters(char* prompt)
     return value / (METERS_COEF);
 }
 
+void flush_buffer()
+{
+	int c;
+	while ((c = getchar()) != '\n' && c != EOF);
+}
+
 bool get_confirmation(char* prompt)
 {
-    char answer = 'n';
-    printf(prompt);
-    scanf("%c", &answer);
-    getchar();
-    return answer == 'y';
+    char answer = '\0';
+	int count;
+	do
+	{
+		printf(prompt);
+		count = scanf("%c", &answer);
+
+		if (answer == '\n' && count == 1) return true;
+		else flush_buffer();
+	} while((answer != 'y' && answer != 'n' && answer != 'Y' && answer != 'N') || count != 1);
+
+    return answer == 'y' || answer == 'Y';
+}
+
+bool input(char* prompt, void* address, char* modifier)
+{
+	printf(prompt);
+	char str[BUFFER_SIZE+3];
+	fgets(str, BUFFER_SIZE, stdin);
+	if (strncmp(str, "\n", 1) == 0) return false;
+	return sscanf(str,modifier, address) == 1;
 }
 
 float to_meters(float value)

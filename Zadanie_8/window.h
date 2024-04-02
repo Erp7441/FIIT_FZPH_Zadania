@@ -19,7 +19,7 @@ unsigned int elapsed = 0;  // Cas framu
 float time_elapsed = 0.f;  // Celkovy cas
 
 
-float display_frame()
+float display_frame(void(*frame_rate_independent_operations)(void))
 {
     unsigned int current_time = glutGet(GLUT_ELAPSED_TIME);
     time_elapsed = (float)(current_time - start_time) / 1000.0f;
@@ -29,6 +29,7 @@ float display_frame()
     if (elapsed > TIME_STEP)
     {
         last_frame_time = current_time - (elapsed % TIME_STEP);
+	    frame_rate_independent_operations();
         glutPostRedisplay();
     }
 
