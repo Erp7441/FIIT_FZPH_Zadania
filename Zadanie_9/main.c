@@ -11,7 +11,15 @@
 #include <math.h>
 
 
-#define FPS 600
+#define FPS 60
+
+#define P_0 101325.f
+#define R 8.31446261815324f
+#define P_N2 powf(0.785f, 43.f)
+#define P_O2 (1-powf(0.785f, 43.f))
+#define M_N2 0.028f
+#define M_O2 0.032f
+#define M (P_N2 * M_N2 + P_O2 * M_O2)
 
 
 void get_data();
@@ -35,6 +43,9 @@ float v = 100.f;
 float y_0 = 0.9f;
 float boost_factor = 1.5f;
 
+// Temperature in kelvin
+float T = 273.15f;
+
 // Parachute
 float p_y = 0.f;
 float p_w = 0.1f;
@@ -46,7 +57,7 @@ float anim_time = 0.f;
 
 bool start = false;
 
-char data_header[] = "quad_x,quad_y,time,max_vel_reached\n";
+char data_header[] = "y,v,rho,t\n";
 FILE* data_file = NULL;  // CSV file containing data
 
 int main(int argc, char **argv)
@@ -77,7 +88,18 @@ void update_pos()
 	p_y = y_0 - to_meters(calculate_position(anim_time));
 	if (p_y < -1.f) p_y = -1.f;
 
-	if (prev_p_y != p_y) t_d = calculate_land_time(v, p_y);
+	if (prev_p_y != p_y)
+	{
+		t_d = calculate_land_time(v, p_y);
+
+		// Update density
+		rho = P_0 * (M / (R * T)) * expf(-(M * G) / (R * T) * from_meters(p_y));
+	}
+
+	float p_v = calculate_velocity(anim_time);
+
+	printf("y = %.2f, v = %.2f, rho = %.2f, t = %.2f\n", p_y, p_v, rho, anim_time);
+	write_to_file(data_file, "%.2f,%.2f,%.2f,%.2f\n", p_y, p_v, rho, anim_time);
 }
 
 void update(const int i)
@@ -89,18 +111,15 @@ void update(const int i)
 		return;
 	}
 
-	if (i % FPS * 2 == 0)
-	{
-		printf("t_D: %.2f\n", t_d);
-		printf("y(t): %.2f\n", p_y);
-	}
+	// STOP ON y = -1
 
-	glutTimerFunc(TIME_STEP, update, i + 1);
+	if (p_y > -1.f)
+		glutTimerFunc(TIME_STEP, update, i + 1);
 }
 
 void get_data()
 {
-	p_y = y_0;
+	p_y = y_0;  // Toto spravi graficky bug v prvy frame
 
     data_file = open_file(generate_file_path("../data.csv"), "w");
     write_to_file(data_file, data_header);
