@@ -36,10 +36,10 @@ float calculate_land_time(float v_start, float y);
 // Input parameters
 float C = 0.5f;
 float S = 10.f;
-float rho = 1.225f;
 float v = 100.f;
 
 // Globals
+float rho = 1.225f;
 float y_0 = 0.9f;
 float boost_factor = 1.5f;
 
@@ -111,8 +111,6 @@ void update(const int i)
 		return;
 	}
 
-	// STOP ON y = -1
-
 	if (p_y > -1.f)
 		glutTimerFunc(TIME_STEP, update, i + 1);
 }
@@ -143,7 +141,7 @@ void draw()
 void keyboard_handler(unsigned char key, int x, int y)
 {
     switch (key)
-    {
+	{
         case 'A':
             if (start) break;
             printf("Animation started!\n");
@@ -170,7 +168,8 @@ float calculate_velocity(float t)
 float calculate_position(float t)
 {
 	float integral = 0.0f;
-	for (float tau = 0.0f; tau <= t; tau += 1.0f / FPS) {
+	for (float tau = 0.0f; tau <= t; tau += 1.0f / FPS)
+	{
 		integral += calculate_velocity(tau) * (1.0f / FPS);
 	}
 	return y_0 + integral;
