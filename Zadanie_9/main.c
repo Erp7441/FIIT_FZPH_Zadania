@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <math.h>
 
+// TODO:: Graf y/t , v/t , rho/y
 
 #define FPS 60
 
