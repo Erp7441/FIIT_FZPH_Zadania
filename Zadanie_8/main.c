@@ -11,7 +11,7 @@
 #include <math.h>
 
 
-#define FPS 60
+#define FPS 240
 
 
 void get_data();

@@ -10,18 +10,18 @@
 #include <stdio.h>
 #include <math.h>
 
-// TODO:: Graf y/t , v/t , rho/y
-
 #define FPS 60
 
-#define P_0 101325.f
-#define R 8.31446261815324f
-#define P_N2 powf(0.785f, 43.f)
-#define P_O2 (1-powf(0.785f, 43.f))
-#define M_N2 0.028f
-#define M_O2 0.032f
-#define M (P_N2 * M_N2 + P_O2 * M_O2)
+typedef enum type {
+	BULLET = 0,
+	CAR = 1
+} Type;
 
+typedef struct object {
+	Type type;
+	float m,v,x,y,w,h;
+	float initial_x, initial_y;
+} Object;
 
 void get_data();
 void draw();
@@ -35,30 +35,21 @@ float calculate_land_time(float v_start, float y);
 
 
 // Input parameters
-float C = 0.5f;
-float S = 10.f;
-float v = 100.f;
+
 
 // Globals
-float rho = 1.225f;
-float y_0 = 0.9f;
-float boost_factor = 1.5f;
+Object small_car = {CAR, 0.1f, 100.f, -0.9f, 0.f, 0.05f, 0.05f};
+Object big_car = {CAR, 0.5f, 90.f, -0.5f, 0.f, 0.3f, 0.1f};
 
-// Temperature in kelvin
-float T = 273.15f;
-
-// Parachute
-float p_y = 0.f;
-float p_w = 0.1f;
-float t_d = 0.f;
-
-float prev_p_y = 0.f;
+float x_0 = 0.f;
 
 float anim_time = 0.f;
 
 bool start = false;
+bool collided = false;
 
-char data_header[] = "y,v,rho,t\n";
+
+//char data_header[] = "y,v,rho,t\n";
 FILE* data_file = NULL;  // CSV file containing data
 
 int main(int argc, char **argv)
@@ -84,22 +75,20 @@ void update_pos()
 {
 	if(!start) return;
 
-	prev_p_y = p_y;
+	small_car.v = (small_car.v *  (big_car.m - small_car.m) - 2 * small_car.m * big_car.v) / (small_car.m + big_car.m);
+	big_car.v = (2 * small_car.m * small_car.v + big_car.v * (big_car.m - small_car.m)) / (small_car.m + big_car.m);
 
-	p_y = y_0 - to_meters(calculate_position(anim_time));
-	if (p_y < -1.f) p_y = -1.f;
 
-	if (prev_p_y != p_y)
-	{
-		t_d = calculate_land_time(v, p_y);
+	small_car.x = small_car.initial_x + to_meters(small_car.v * anim_time);
+	big_car.x = big_car.initial_x + to_meters(big_car.v * anim_time);
 
-		// Update density
-		rho = P_0 * (M / (R * T)) * expf(-(M * G) / (R * T) * from_meters(p_y));
 
-		float p_v = calculate_velocity(anim_time);
-		printf("y = %.4f, v = %.4f, rho = %.4f, t = %.4f\n", p_y, p_v, rho, anim_time);
-		write_to_file(data_file, "%.4f,%.4f,%.4f,%.4f\n", p_y, p_v, rho, anim_time);
-	}
+
+
+
+	printf("sc_x: %.4f, sc_v: %.4f, bc_x: %.4f, bc_v: %.4f, col: %d, x_0: %.4f\n", small_car.x, small_car.v, big_car.x,
+		   big_car.v,
+	       collided, x_0);
 }
 
 void update(const int i)
@@ -111,16 +100,24 @@ void update(const int i)
 		return;
 	}
 
-	if (p_y > -1.f)
-		glutTimerFunc(TIME_STEP, update, i + 1);
+	glutTimerFunc(TIME_STEP, update, i + 1);
 }
 
 void get_data()
 {
-	p_y = y_0;  // Toto spravi graficky bug v prvy frame
+
+	x_0 = (small_car.x) - (big_car.x);
+
+	small_car.v = to_meters(1000.f);
+	big_car.v = to_meters(900.f);
+
+	small_car.initial_x = small_car.x;
+	small_car.initial_y = small_car.y;
+	big_car.initial_x = big_car.x;
+	big_car.initial_y = big_car.y;
 
     data_file = open_file(generate_file_path("../data.csv"), "w");
-    write_to_file(data_file, data_header);
+//    write_to_file(data_file, data_header);
 
     printf("Press Shift+A to start the animation...\n");
 }
@@ -130,8 +127,13 @@ void draw()
     glClear(GL_COLOR_BUFFER_BIT);
 
 
+	// Bullet
     glColor3f(1.f, 1.f, 0.f);
-	draw_quad(0.f, p_y, 0.f, p_w, 0.f);
+	draw_quad(small_car.x, small_car.y, small_car.w, small_car.h, 0.f);
+
+	// Car
+	glColor3f(0.f, 1.f, 0.f);
+	draw_quad(big_car.x, big_car.y, big_car.w, big_car.h, 0.f);
 
 
     glutSwapBuffers();
@@ -155,29 +157,4 @@ void keyboard_handler(unsigned char key, int x, int y)
         default:
             break;
     }
-}
-
-float calculate_velocity(float t)
-{
-	float v_inf = sqrtf((2 * G * v) / (C * rho * S));
-	float tanh_term = tanhf((G * t) / v_inf);
-	float result = v_inf * tanh_term;
-	return result * boost_factor;
-}
-
-float calculate_position(float t)
-{
-	float integral = 0.0f;
-	for (float tau = 0.0f; tau <= t; tau += 1.0f / FPS)
-	{
-		integral += calculate_velocity(tau) * (1.0f / FPS);
-	}
-	return y_0 + integral;
-}
-
-float calculate_land_time(float v_start, float y)
-{
-	y = from_meters(y + 1.f);
-	float v_inf_start = sqrtf((2 * G * v_start) / (C * rho * S));
-	return (v_inf_start / G) * acoshf(expf(y * y / (v_inf_start * v_inf_start)));
 }
