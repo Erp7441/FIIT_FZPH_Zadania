@@ -1,6 +1,2 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<module classpath="CMake" type="CPP_MODULE" version="4">
-  <component name="SonarLintModuleSettings">
-    <option name="uniqueId" value="b100120a-48c9-4e75-965b-52cc1d4a28b6" />
-  </component>
-</module>
+<module classpath="CMake" type="CPP_MODULE" version="4" />

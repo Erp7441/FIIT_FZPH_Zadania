@@ -38,9 +38,9 @@ float display_frame(void(*frame_rate_independent_operations)(void))
 }
 
 void initialize_window(void(*get_data)(void), void(*draw)(void), void(*update)(int), char* title, int width, int
-height, bool fullscreen)
+height, bool fullscreen, bool depth_test, unsigned int display_mode)
 {
-    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
+    glutInitDisplayMode(display_mode);
     glutInitWindowSize(width, height);
     glutInitWindowPosition(0, 0);
 
@@ -48,6 +48,7 @@ height, bool fullscreen)
 
     glutCreateWindow(title);
     if (fullscreen) glutFullScreen();
+	if (depth_test) glEnable(GL_DEPTH_TEST);
     glutDisplayFunc(draw);
 
     glutTimerFunc(TIME_STEP, update, 0);
