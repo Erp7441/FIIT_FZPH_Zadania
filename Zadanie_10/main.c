@@ -22,22 +22,19 @@ void special_key_handler(int key, int x, int y);
 // Mouse
 void mouse_wheel_handler(int wheel, int direction, int x, int y);
 // Utility
-void reset_simulation();
+void reset_simulation(bool hard);
 void reset_camera();
 void close_simulation();
+void check_bounds(float* value, float offset, float max_bound, float min_bound);
 
 
 // Simulation
 float anim_time = 0.f;
 bool bounce = false;
 
-const float UK = 0.1f;
-const float THETA = M_PI / 4;
 
 // Bullet
 typedef struct {
-	float azimuth;  // 45 stupnov
-	float elevation; // 45 stupnov
 	float x; float y; float z;
 	float vx; float vy; float vz;
 	float ax; float ay; float az;
@@ -45,15 +42,13 @@ typedef struct {
 	float force;
 	const float s_x; const float s_y; const float s_z;
 	const float size;
-	float azimuth_rad; float elevation_rad;
-	float curr_dist; float curr_azimuth; float curr_elevation;
 } Ball;
 
-// Window bounds
+// Window box
 typedef struct {
 	const float max_x; const float max_y; const float max_z;
 	const float min_x; const float min_y; const float min_z;
-} Bounds;
+} Box;
 
 // Camera
 typedef struct {
@@ -68,16 +63,15 @@ typedef struct {
 
 
 Ball ball = {
-	.azimuth = 5.f, .elevation = 0.f, .x = 0.f, .y=0.f, .z=0.f,
+	.x = 0.f, .y=0.f, .z=0.f,
 	.vx= 0.02f, .vy= 0.03f, .vz= 0.01f,
 	.ax= 0.0f, .ay= 0.0f, .az= 0.0f,
 	.m = 1.0f, .force = 0.0f,
 	.s_x= 0.f, .s_y= 0.f, .s_z= 0.f,
 	.size= 0.05f,
-	.azimuth_rad= 0.f, .elevation_rad = 0.f, .curr_dist= 0.f, .curr_azimuth = 0.f, .curr_elevation = 0.f
 };
 
-Bounds bounds = {
+Box box = {
 	.max_x = 2.51f, .max_y = 1.f, .max_z = 2.51f,
 	.min_x = 0.f, .min_y = 0.f, .min_z = 0.f
 };
@@ -119,42 +113,87 @@ int main(int argc, char **argv)
     return 0;
 }
 
-
-void update_pos()
+float delta_p(float v, float m, float alfa)
 {
+	return 2 * m * v * cosf(alfa);
+}
+
+
+float calc_alpha(Ball o, float normal_x, float normal_y, float normal_z) {
+	// Vypočítanie dotykového produktu
+	float dot_product = o.vx * normal_x + o.vy * normal_y + o.vz * normal_z;
+
+	// Vypočítanie dĺžok vektorov
+	float v_length = sqrtf(o.vx * o.vx + o.vy * o.vy + o.vz * o.vz);
+	float n_length = sqrtf(normal_x * normal_x + normal_y * normal_y + normal_z * normal_z);
+
+	// Vypočítanie kosínusu uhla nárazu pomocou dotykového produktu a dĺžok vektorov
+	float cos_alpha = dot_product / (v_length * n_length);
+
+	// Vrátenie uhla nárazu v radiánoch
+	return acosf(1);
+}
+
+
+void update_pos() {
 	if (!bounce) return;
 
-	ball.x += ball.vx * anim_time + 0.5f * ball.ax * (anim_time * anim_time);
-	ball.y += ball.vy * anim_time + 0.5f * ball.ay * (anim_time * anim_time);
-	ball.z += ball.vz * anim_time + 0.5f * ball.az * (anim_time * anim_time);
+	// Kontrola kolízie so stenami
+	if (ball.x + ball.size >= box.max_x || ball.x - ball.size <= box.min_x)
+	{
+		// Zmena smeru
+		ball.vx = -ball.vx;
 
+
+		// Výpočet normálového vektoru steny
+		float normal_x = (ball.x + ball.size >= box.max_x) ? -1.0f : 1.0f;
+
+		// Zmena hybnosti
+		float delta_p_x = delta_p(ball.vx, ball.m, calc_alpha(ball, normal_x, 0.0f, 0.0f));
+		// Aplikácia zmeny hybnosti na rýchlosť
+		ball.vx += delta_p_x / anim_time;
+		printf("Delta p_x: %.3f\n", delta_p_x);
+	}
+	if (ball.y + ball.size >= box.max_y || ball.y - ball.size <= box.min_y)
+	{
+		// Zmena smeru
+		ball.vy = -ball.vy;
+		// Zmena hybnosti
+		float delta_p_y = delta_p(ball.vy, ball.m, calc_alpha(ball, 0.0f, 1.0f, 0.0f));
+		// Aplikácia zmeny hybnosti na rýchlosť
+		ball.vy += delta_p_y / anim_time;
+		printf("Delta p_y: %.3f\n", delta_p_y);
+	}
+	if (ball.z + ball.size >= box.max_z || ball.z - ball.size <= box.min_z)
+	{
+		// Zmena smeru
+		ball.vz = -ball.vz;
+		// Zmena hybnosti
+		float delta_p_z = delta_p(ball.vz, ball.m, calc_alpha(ball, 0.0f, 0.0f, 1.0f));
+		// Aplikácia zmeny hybnosti na rýchlosť
+		ball.vz += delta_p_z / anim_time;
+		printf("Delta p_z: %.3f\n", delta_p_z);
+	}
+
+	// Aktualizácia pozície
+	ball.x += to_meters(ball.vx * anim_time);
+	ball.y += to_meters(ball.vy * anim_time);
+	ball.z += to_meters(ball.vz * anim_time);
+
+	// Aktualizácia rýchlosti
 	ball.vx += ball.ax * anim_time;
 	ball.vy += ball.ay * anim_time;
 	ball.vz += ball.az * anim_time;
 
-	// Kontrola prekročenia hraníc kocky
-	if (ball.x + ball.size >= bounds.max_x || ball.x - ball.size <= bounds.min_x) {
-		ball.vx = -ball.vx; // Zmena smeru na opačný
-	}
-	if (ball.y + ball.size >= bounds.max_y || ball.y - ball.size <= bounds.min_y) {
-		ball.vy = -ball.vy;
-	}
-	if (ball.z + ball.size >= bounds.max_z || ball.z - ball.size <= bounds.min_z) {
-		ball.vz = -ball.vz;
-	}
+	check_bounds(&ball.x, ball.size, box.max_x, box.min_x);
+	check_bounds(&ball.y, ball.size, box.max_y,  box.min_y+ball.size);
+	check_bounds(&ball.z, ball.size, box.max_z, box.min_z);
 
-	// Vypočítanie nových rýchlostí po zrážke
-	float delta_px = 2 * ball.m * ball.vx * cosf(ball.azimuth_rad);
-	float delta_py = 2 * ball.m * ball.vy * cosf(ball.elevation_rad);
-	float delta_pz = 2 * ball.m * ball.vz * cosf(ball.azimuth_rad);
-
-	// Vypočítaj nové rýchlosti
-	ball.vx = delta_px / anim_time;
-	ball.vy = delta_py / anim_time;
-	ball.vz = delta_pz / anim_time;
-
-	printf ("X: %.3f, Y: %.3f, Z: %.3f\n", ball.x, ball.y, ball.z);
+	printf("X: %.3f, Y: %.3f, Z: %.3f\n", ball.x, ball.y, ball.z);
 }
+
+
+
 
 void update(const int i)
 {
@@ -214,11 +253,14 @@ void key_handler(unsigned char key, int x, int y) {
 			bounce = true;
             break;
         case 'r':
-	        reset_simulation();
+	        reset_simulation(false);
             break;
+	    case 'R':
+		    reset_simulation(true);
+		    break;
         case 'G':
             get_data();
-		    reset_simulation();
+		    reset_simulation(false);
             break;
         case 'C':
             reset_camera();
@@ -269,7 +311,7 @@ void mouse_wheel_handler(int wheel, int direction, int x, int y)
 
 
 // Utility
-void reset_simulation()
+void reset_simulation(bool hard)
 {
 //    write_to_file(data_file, data_header); FILE
 	bounce = false;
@@ -277,12 +319,18 @@ void reset_simulation()
 	ball.y = ball.s_y;
 	ball.z = ball.s_z;
 
-    reset_camera();
+	ball.vx= 0.02f;
+	ball.vy= 0.03f;
+	ball.vz= 0.01f;
+	ball.ax= 0.0f;
+	ball.ay= 0.0f;
+	ball.az= 0.0f;
+	ball.force = 0.0f;
 
-    anim_time = 0.f;
-    ball.curr_dist = 0.f;
-    ball.curr_azimuth = 0.f;
-    ball.curr_elevation = 0.f;
+	if (hard)
+        reset_camera();
+
+    anim_time = 0.00001f;
 }
 
 void reset_camera()
@@ -304,4 +352,10 @@ void close_simulation()
     printf("Data zapisane do subora!\n");
 
     glutLeaveMainLoop();
+}
+
+void check_bounds(float* value, float offset, float max_bound, float min_bound)
+{
+	if (*value+offset >= max_bound + offset) *value = max_bound;
+	else if (*value+offset <= min_bound + offset) *value = min_bound;
 }
