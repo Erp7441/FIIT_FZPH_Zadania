@@ -2,6 +2,8 @@
 #include <GL/glut.h>
 #include <GL/freeglut.h>
 #include <stdio.h>
+#include <time.h>
+#include <stdlib.h>
 
 #ifndef ZADANIE_4_UTILS_H
 #define ZADANIE_4_UTILS_H
@@ -15,6 +17,18 @@
 #define DEBUG
 
 #pragma once
+
+typedef struct {
+	float x, y;
+} Vector;
+
+typedef struct {
+	float r, g, b;
+} Color;
+
+typedef struct {
+	Vector min, max;
+} Bounds;
 
 void resize(int w, int h) {
     glViewport(0, 0, w, h);
@@ -93,4 +107,17 @@ void printf_debug(const char* format, ...)
         vprintf(format, args);
         va_end(args);
     #endif
+}
+
+void check_bounds(float* value, float offset, float max_bound, float min_bound)
+{
+	if (*value+offset >= max_bound + offset) *value = max_bound;
+	else if (*value+offset <= min_bound + offset) *value = min_bound;
+}
+
+float random_number(float max, float min)
+{
+	float range = max - min;
+	float random = ((float) rand()) / (float) RAND_MAX;
+	return (random * range) + min;
 }

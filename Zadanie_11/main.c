@@ -3,18 +3,17 @@
 #include "utils.h"
 #include "shapes.h"
 #include "file.h"
+#include "ball.h"
 
 #include <GL/gl.h>
 #include <GL/glut.h>
 #include <GL/freeglut.h>
 #include <stdio.h>
-#include <math.h>
 
 #define BUFFER_SIZE 256
 
 void get_data();
 void draw();
-void draw_balls();
 // Update
 void update(int i);
 // Keyboard
@@ -23,70 +22,35 @@ void key_handler(unsigned char key, int x, int y);
 void reset_simulation(bool hard);
 void close_simulation();
 
+const int INIT_N = 1;
 
 // Simulation
 float anim_time = 0.f;
 float reset_time = 0.f;
 
-typedef struct {
-	float x, y;
-} Vector;
-
-typedef struct {
-	float r, g, b;
-} Color;
-
-typedef struct {
-	Vector min, max;
-} Bounds;
-
-typedef struct {
-	const int id;
-	Vector pos, prev_pos, vel;
-	const float r, m;
-	Color c;
-} Ball;
-
-
-Ball balls[] = {
-{
-		.id = 1,
-		.pos = { 0.f, 0.f },
-		.prev_pos = { 0.f, 0.f },
-		.vel = { 0.5f, 1.f },
-		.r = 0.03f,
-		.m = 1.f,
-		.c = { 1.f, 0.f, 0.f }
-	},
-{
-		.id = 2,
-		.pos = { 0.5f, 0.5f },
-		.prev_pos = { 0.f, 0.f },
-		.vel = { 0.f, 0.f },
-		.r = 0.03f,
-		.m = 1.f,
-		.c = { 0.f, 0.f, 1.f }
-	},
-};
-
+Ball* balls = NULL;
+int N = INIT_N;
 
 Bounds bounds = {
-	.min = { -1.f, -1.f },
-	.max = { 1.f, 1.f }
+	.min = { -1.77f, -0.99999633f },
+	.max = { 1.77f, 0.99999633f }
 };
 
 // File
-char data_header[] = "x,y,z,time\n";
+char data_header[] = "id,pos_x,pos_y,vel_x,vel_y,time\n";
 FILE* data_file = NULL;  // CSV file containing data
 
 
 
 int main(int argc, char **argv)
 {
+	srand((unsigned int)time(NULL));
+
+	balls = generate_balls(N);
     glutInit(&argc, argv);
 
     // Initializes GLUT window
-    initialize_window(get_data, draw, update, "OpenGL: Zadanie 11", 1920, 1080, true, true, GLUT_RGB | GLUT_DOUBLE);
+    initialize_window(get_data, draw, update, "OpenGL: Zadanie 11", 1920, 1080, true, false, GLUT_RGB | GLUT_DOUBLE);
 
     glutKeyboardFunc(key_handler);
 
@@ -99,41 +63,16 @@ int main(int argc, char **argv)
     return 0;
 }
 
-void ball_collided_bounds(Ball* b)
+void write_ball_to_file(Ball* ball)
 {
-	if (b->pos.x < bounds.min.x || b->pos.x > bounds.max.x) {
-		b->vel.x = -b->vel.x;
-	}
-
-	if (b->pos.y < bounds.min.y || b->pos.y > bounds.max.y) {
-		b->vel.y = -b->vel.y;
-	}
+	if (ball == NULL) return;
+	write_to_file(data_file, "%d,%f,%f,%f,%f,%f\n", ball->id, ball->pos.x, ball->pos.y, ball->vel.x, ball->vel.y, anim_time);
 }
-
-void ball_move(Ball* b) {
-	printf("Ball %d - pos: %.3f, %.3f\n", b->id, b->pos.x, b->pos.y);
-	b->prev_pos.x = b->pos.x;
-	b->prev_pos.y = b->pos.y;
-	b->pos.x += b->vel.x;
-	b->pos.y += b->vel.y;
-
-	ball_collided_bounds(b);
-}
-
-void update_balls(void(*func)(Ball*))
-{
-	int balls_count = sizeof(balls) / sizeof(Ball);
-	for (int i = 0; i < balls_count; i++) {
-		func(&(balls[i]));
-	}
-}
-
 
 void update_pos() {
-	update_balls(ball_move);
+	update_balls(ball_move, balls, N);
+	update_balls(write_ball_to_file, balls, N);
 }
-
-
 
 
 void update(const int i)
@@ -149,36 +88,46 @@ void get_data()
     data_file = open_file(generate_file_path("../data.csv"), "w"); // FILE
     write_to_file(data_file, data_header); // FILE
 
-
     printf("Press any key to start...\n");
     getchar();
 
 	printf("Starting animation...\n");
 }
 
-void draw_balls()
-{
-	int balls_count = sizeof(balls) / sizeof(Ball);
-	for (int i = 0; i < balls_count; i++) {
-		glColor3f(balls[i].c.r, balls[i].c.g, balls[i].c.b);
-		draw_circle(balls[i].pos.x, balls[i].pos.y, 0.f, balls[i].r*2.f);
-
-	}
-}
 
 void draw()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	draw_balls();
+	glColor3f(0.f, 1.f, 0.f);
+	draw_bounds(bounds.max.x, bounds.max.y, bounds.min.x, bounds.min.y);
+
+	for (int i = 0; i < N; i++) {
+		glColor3f(balls[i].c.r, balls[i].c.g, balls[i].c.b);
+		draw_circle(balls[i].pos.x, balls[i].pos.y, 0.f, balls[i].r*2.f);
+	}
+
     glutSwapBuffers();
 }
 
 
 void key_handler(unsigned char key, int x, int y) {
+	printf("X: %f, Y: %f\n", balls[1].pos.x, balls[1].pos.y);
     switch (key) {
-        case ' ':
-
-            break;
+//		case 'w':
+//			balls[1].pos.y += 0.01f;
+//			break;
+//        case 'd':
+//			balls[1].pos.x += 0.01f;
+//            break;
+//		case 's':
+//			balls[1].pos.y -= 0.01f;
+//			break;
+//		case 'a':
+//			balls[1].pos.x -= 0.01f;
+//			break;
+		case 'A':
+			balls = add_balls(balls, &N, N+1);
+			break;
         case 'r':
 	        reset_simulation(false);
             break;
@@ -198,17 +147,19 @@ void key_handler(unsigned char key, int x, int y) {
 }
 
 
-
 // Utility
 void reset_simulation(bool hard)
 {
     write_to_file(data_file, data_header); // FILE
 
+	if (hard)
+		N = INIT_N;
+
+	balls = generate_balls(N);
 
 	reset_time += anim_time ;
     anim_time = 0.0f;
 }
-
 
 
 void close_simulation()
@@ -220,3 +171,6 @@ void close_simulation()
 
     glutLeaveMainLoop();
 }
+
+
+

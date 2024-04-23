@@ -11,6 +11,7 @@ add_executable(Zadanie_11 main.c
         shapes.h
         utils.h
         file.h
+        ball.h
 )
 
 

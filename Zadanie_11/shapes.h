@@ -296,3 +296,19 @@ void draw_ball_fade(float x, float y, float z, float radius, float r, float g, f
 
 	glPopMatrix();
 }
+
+void draw_bounds(float max_x, float max_y, float min_x, float min_y) {
+	glLoadIdentity();
+
+	glBegin(GL_LINES);
+	glVertex2d(min_x, min_y);
+	glVertex2d(max_x, min_y);
+	glVertex2d(max_x, max_y);
+	glVertex2d(min_x, max_y);
+
+	glVertex2d(min_x, min_y);
+	glVertex2d(min_x, max_y);
+	glVertex2d(max_x, min_y);
+	glVertex2d(max_x, max_y);
+	glEnd();
+}
