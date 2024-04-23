@@ -245,7 +245,7 @@ bool balls_collided(Ball* b1, Ball* b2)
 	float dx = b1->pos.x - b2->pos.x;
 	float dy = b1->pos.y - b2->pos.y;
 	float dist = sqrtf(dx * dx + dy * dy);
-	return dist < d1 + d2;
+	return dist < d1 + d2;  // TODO:: Fix stucking into each other bug
 }
 
 bool balls_collided_ref(Ball* b1, Ball* b2, float* dx, float* dy, float* dist)

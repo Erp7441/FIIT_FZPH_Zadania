@@ -27,6 +27,7 @@ const int INIT_N = 1;
 // Simulation
 float anim_time = 0.f;
 float reset_time = 0.f;
+bool running = false;
 
 Ball* balls = NULL;
 int N = INIT_N;
@@ -72,6 +73,7 @@ void write_ball_to_file(Ball* ball)
 }
 
 void update_pos() {
+	if (!running) return;
 	update_balls(ball_move, balls, N);
 	update_balls_2(apply_impulse, balls, N, true);
 	update_balls_2(calculate_ball_collision_time, balls, N, true);
@@ -96,8 +98,6 @@ void get_data()
 
     printf("Press any key to start...\n");
     getchar();
-
-	printf("Starting animation...\n");
 }
 
 
@@ -131,6 +131,9 @@ void key_handler(unsigned char key, int x, int y) {
 //		case 'a':
 //			balls[1].pos.x -= 0.01f;
 //			break;
+		case ' ':
+			running = true;
+			break;
 		case 'A':
 			balls = add_balls(balls, &N, N+1);
 			break;
@@ -164,6 +167,7 @@ void reset_simulation(bool hard)
 	if (hard)
 		N = INIT_N;
 
+	running = false;
 	balls = generate_balls(N);
 
 	reset_time += anim_time ;
