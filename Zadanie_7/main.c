@@ -16,6 +16,7 @@
 #define BUFFER_SIZE 256
 #define GAME_MODE
 //#define BULLET_BOUNDS
+#define FPS 60
 
 void get_data();
 void draw();
@@ -37,7 +38,7 @@ float calc_azimuth(float x1, float y1, float z1, float x2, float y2, float z2);
 float calc_elevation(float x1, float y1, float z1, float x2, float y2, float z2);
 float calc_velocity(float dist, float height, float elev);
 // Utility
-void reset_game(bool hard_reset);
+void reset_simulation(bool hard_reset);
 void reset_camera();
 void detach_package();
 void close_game();
@@ -470,7 +471,7 @@ float calc_velocity(float dist, float height, float elev)
 }
 
 // Utility
-void reset_game(bool hard_reset)
+void reset_simulation(bool hard_reset)
 {
     game_end = false;
     write_to_file(data_file, data_header);

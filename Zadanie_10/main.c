@@ -26,10 +26,12 @@ void reset_simulation(bool hard);
 void reset_camera();
 void close_simulation();
 void check_bounds(float* value, float offset, float max_bound, float min_bound);
+void check_max_m(float* m_x, float* m_y, float* m_z, float max_val);
 
 
 // Simulation
 float anim_time = 0.f;
+float reset_time = 0.f;
 bool bounce = false;
 
 
@@ -64,7 +66,7 @@ typedef struct {
 
 Ball ball = {
 	.x = 0.f, .y=0.f, .z=0.f,
-	.vx= 0.02f, .vy= 0.03f, .vz= 0.01f,
+	.vx= 1.0f, .vy= 1.5f, .vz= -1.5f,
 	.ax= 0.0f, .ay= 0.0f, .az= 0.0f,
 	.m = 1.0f, .force = 0.0f,
 	.s_x= 0.f, .s_y= 0.f, .s_z= 0.f,
@@ -131,12 +133,14 @@ float calc_alpha(Ball o, float normal_x, float normal_y, float normal_z) {
 	float cos_alpha = dot_product / (v_length * n_length);
 
 	// Vrátenie uhla nárazu v radiánoch
-	return acosf(1);
+	return acosf(cos_alpha);
 }
 
 
 void update_pos() {
 	if (!bounce) return;
+
+	if (anim_time < 10.f) anim_time = 10.f;
 
 	// Kontrola kolízie so stenami
 	if (ball.x + ball.size >= box.max_x || ball.x - ball.size <= box.min_x)
@@ -188,6 +192,8 @@ void update_pos() {
 	check_bounds(&ball.x, ball.size, box.max_x, box.min_x);
 	check_bounds(&ball.y, ball.size, box.max_y,  box.min_y+ball.size);
 	check_bounds(&ball.z, ball.size, box.max_z, box.min_z);
+	check_max_m(&ball.vx, &ball.vy, &ball.vz, 1.f);
+	check_max_m(&ball.ax, &ball.ay, &ball.az, 1.f);
 
 	printf("X: %.3f, Y: %.3f, Z: %.3f\n", ball.x, ball.y, ball.z);
 }
@@ -197,7 +203,7 @@ void update_pos() {
 
 void update(const int i)
 {
-    anim_time = display_frame(update_pos);
+    anim_time = display_frame(update_pos) - reset_time;
 
     write_to_file(data_file, "%f,%f,%f,%f\n", ball.x, ball.y, anim_time); // FILE
     glutTimerFunc(TIME_STEP, update, i + 1);
@@ -212,6 +218,8 @@ void get_data()
 
     printf("Press any key to start...\n");
     getchar();
+
+	printf("Starting animation...\n");
 }
 
 
@@ -313,7 +321,7 @@ void mouse_wheel_handler(int wheel, int direction, int x, int y)
 // Utility
 void reset_simulation(bool hard)
 {
-//    write_to_file(data_file, data_header); FILE
+    write_to_file(data_file, data_header); // FILE
 	bounce = false;
 	ball.x = ball.s_x;
 	ball.y = ball.s_y;
@@ -330,7 +338,8 @@ void reset_simulation(bool hard)
 	if (hard)
         reset_camera();
 
-    anim_time = 0.00001f;
+	reset_time += anim_time ;
+    anim_time = 0.0f;
 }
 
 void reset_camera()
@@ -358,4 +367,14 @@ void check_bounds(float* value, float offset, float max_bound, float min_bound)
 {
 	if (*value+offset >= max_bound + offset) *value = max_bound;
 	else if (*value+offset <= min_bound + offset) *value = min_bound;
+}
+
+void check_max_m(float* m_x, float* m_y, float* m_z, float max_val)
+{
+	if (*m_x > max_val) *m_x = max_val;
+	else if (*m_x < -max_val) *m_x = -max_val;
+	if (*m_y > max_val) *m_y = max_val;
+	else if (*m_y < -max_val) *m_y = -max_val;
+	if (*m_z > max_val) *m_z = max_val;
+	else if (*m_z < -max_val) *m_z = -max_val;
 }
