@@ -60,7 +60,9 @@ int main(int argc, char **argv)
     // Starts GLUT main loop
     start_animation();
 
-    return 0;
+	if (data_file != NULL) close_file(data_file); // FILE
+
+	return 0;
 }
 
 void write_ball_to_file(Ball* ball)
@@ -71,7 +73,11 @@ void write_ball_to_file(Ball* ball)
 
 void update_pos() {
 	update_balls(ball_move, balls, N);
+	update_balls_2(apply_impulse, balls, N, true);
+	update_balls_2(calculate_ball_collision_time, balls, N, true);
+	update_balls(calculate_wall_collision_time, balls, N);
 	update_balls(write_ball_to_file, balls, N);
+	print_balls(balls, N);
 }
 
 
@@ -128,6 +134,9 @@ void key_handler(unsigned char key, int x, int y) {
 		case 'A':
 			balls = add_balls(balls, &N, N+1);
 			break;
+		case 'D':
+			remove_balls(balls, &N, N-1);
+			break;
         case 'r':
 	        reset_simulation(false);
             break;
@@ -167,6 +176,7 @@ void close_simulation()
     printf("Simulacia ukoncena!\n");
 
     close_file(data_file); // FILE
+	data_file = NULL;
     printf("Data zapisane do subora!\n");
 
     glutLeaveMainLoop();

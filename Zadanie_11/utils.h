@@ -30,6 +30,10 @@ typedef struct {
 	Vector min, max;
 } Bounds;
 
+typedef enum {
+	X = 0, Y = 1, Z = 2
+} Axis;
+
 void resize(int w, int h) {
     glViewport(0, 0, w, h);
     glMatrixMode(GL_PROJECTION);
