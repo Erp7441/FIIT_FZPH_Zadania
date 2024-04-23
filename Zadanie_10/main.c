@@ -11,6 +11,7 @@
 #include <math.h>
 
 #define BUFFER_SIZE 256
+#define MAX_VEL 0.05f
 
 void get_data();
 void draw();
@@ -39,10 +40,12 @@ bool bounce = false;
 typedef struct {
 	float x; float y; float z;
 	float vx; float vy; float vz;
+	float prev_vx; float prev_vy; float prev_vz;
 	float ax; float ay; float az;
 	float m;
-	float force;
 	const float s_x; const float s_y; const float s_z;
+	const float s_vx; const float s_vy; const float s_vz;
+	const float s_ax; const float s_ay; const float s_az;
 	const float size;
 } Ball;
 
@@ -59,17 +62,20 @@ typedef struct {
 	float speed; float distance; float distance_s;
 	float x; float y; float z;
 	float center_x; float center_y; float center_z;
-	float center_s_x; float center_s_y; float center_s_z;
+	const float center_s_x; const float center_s_y; const float center_s_z;
 	float up_x; float up_y; float up_z;
 } Camera;
 
 
 Ball ball = {
 	.x = 0.f, .y=0.f, .z=0.f,
-	.vx= 1.0f, .vy= 1.5f, .vz= -1.5f,
+	.vx= 0.010f, .vy= 0.015f, .vz= -0.015f,
 	.ax= 0.0f, .ay= 0.0f, .az= 0.0f,
-	.m = 1.0f, .force = 0.0f,
+	.prev_vx = 0.f, .prev_vy = 0.f, .prev_vz = 0.f,
+	.m = 1.0f,
 	.s_x= 0.f, .s_y= 0.f, .s_z= 0.f,
+	.s_vx= 1.f, .s_vy= 1.5f, .s_vz= -1.5f,
+	.s_ax= 0.f, .s_ay= 0.f, .s_az= 0.f,
 	.size= 0.05f,
 };
 
@@ -122,17 +128,13 @@ float delta_p(float v, float m, float alfa)
 
 
 float calc_alpha(Ball o, float normal_x, float normal_y, float normal_z) {
-	// Vypočítanie dotykového produktu
 	float dot_product = o.vx * normal_x + o.vy * normal_y + o.vz * normal_z;
 
-	// Vypočítanie dĺžok vektorov
 	float v_length = sqrtf(o.vx * o.vx + o.vy * o.vy + o.vz * o.vz);
 	float n_length = sqrtf(normal_x * normal_x + normal_y * normal_y + normal_z * normal_z);
 
-	// Vypočítanie kosínusu uhla nárazu pomocou dotykového produktu a dĺžok vektorov
 	float cos_alpha = dot_product / (v_length * n_length);
 
-	// Vrátenie uhla nárazu v radiánoch
 	return acosf(cos_alpha);
 }
 
@@ -142,60 +144,73 @@ void update_pos() {
 
 	if (anim_time < 10.f) anim_time = 10.f;
 
-	// Kontrola kolízie so stenami
 	if (ball.x + ball.size >= box.max_x || ball.x - ball.size <= box.min_x)
 	{
 		// Zmena smeru
 		ball.vx = -ball.vx;
 
-
-		// Výpočet normálového vektoru steny
+		// Normalovy vektor
 		float normal_x = (ball.x + ball.size >= box.max_x) ? -1.0f : 1.0f;
 
 		// Zmena hybnosti
 		float delta_p_x = delta_p(ball.vx, ball.m, calc_alpha(ball, normal_x, 0.0f, 0.0f));
-		// Aplikácia zmeny hybnosti na rýchlosť
+
+		// Aplikacia zmeny hybnosti na rychlost
 		ball.vx += delta_p_x / anim_time;
-		printf("Delta p_x: %.3f\n", delta_p_x);
 	}
 	if (ball.y + ball.size >= box.max_y || ball.y - ball.size <= box.min_y)
 	{
 		// Zmena smeru
 		ball.vy = -ball.vy;
+
+		// Normalovy vektor
+		float normal_y = (ball.y + ball.size >= box.max_y) ? -1.0f : 1.0f;
+
 		// Zmena hybnosti
-		float delta_p_y = delta_p(ball.vy, ball.m, calc_alpha(ball, 0.0f, 1.0f, 0.0f));
-		// Aplikácia zmeny hybnosti na rýchlosť
+		float delta_p_y = delta_p(ball.vy, ball.m, calc_alpha(ball, 0.0f, normal_y, 0.0f));
+
+		// Aplikacia zmeny hybnosti na rychlost
 		ball.vy += delta_p_y / anim_time;
-		printf("Delta p_y: %.3f\n", delta_p_y);
 	}
 	if (ball.z + ball.size >= box.max_z || ball.z - ball.size <= box.min_z)
 	{
 		// Zmena smeru
 		ball.vz = -ball.vz;
+
+		// Normalovy vektor
+		float normal_z = (ball.z + ball.size >= box.max_z) ? -1.0f : 1.0f;
+
 		// Zmena hybnosti
-		float delta_p_z = delta_p(ball.vz, ball.m, calc_alpha(ball, 0.0f, 0.0f, 1.0f));
-		// Aplikácia zmeny hybnosti na rýchlosť
+		float delta_p_z = delta_p(ball.vz, ball.m, calc_alpha(ball, 0.0f, 0.0f, normal_z));
+
+		// Aplikacia zmeny hybnosti na rychlost
 		ball.vz += delta_p_z / anim_time;
-		printf("Delta p_z: %.3f\n", delta_p_z);
 	}
 
-	// Aktualizácia pozície
-	ball.x += to_meters(ball.vx * anim_time);
-	ball.y += to_meters(ball.vy * anim_time);
-	ball.z += to_meters(ball.vz * anim_time);
+	ball.ax = ball.vx - ball.prev_vx / anim_time;
+	ball.ay = ball.vy - ball.prev_vy / anim_time;
+	ball.az = ball.vz - ball.prev_vz / anim_time;
+
+	// Aktualizacia pozicie
+	ball.x += ball.vx * anim_time;
+	ball.y += ball.vy * anim_time;
+	ball.z += ball.vz * anim_time;
+
+	ball.prev_vx = ball.vx;
+	ball.prev_vy = ball.vy;
+	ball.prev_vz = ball.vz;
 
 	// Aktualizácia rýchlosti
-	ball.vx += ball.ax * anim_time;
-	ball.vy += ball.ay * anim_time;
-	ball.vz += ball.az * anim_time;
+	ball.vx += to_meters(ball.ax * anim_time);
+	ball.vy += to_meters(ball.ay * anim_time);
+	ball.vz += to_meters(ball.az * anim_time);
 
 	check_bounds(&ball.x, ball.size, box.max_x, box.min_x);
 	check_bounds(&ball.y, ball.size, box.max_y,  box.min_y+ball.size);
 	check_bounds(&ball.z, ball.size, box.max_z, box.min_z);
-	check_max_m(&ball.vx, &ball.vy, &ball.vz, 1.f);
-	check_max_m(&ball.ax, &ball.ay, &ball.az, 1.f);
+	check_max_m(&ball.vx, &ball.vy, &ball.vz, to_meters(MAX_VEL));
 
-	printf("X: %.3f, Y: %.3f, Z: %.3f\n", ball.x, ball.y, ball.z);
+	printf("X:\t%.3f,\t\tY:\t%.3f,\t\tZ:\t%.3f\n", ball.x, ball.y, ball.z);
 }
 
 
@@ -327,13 +342,13 @@ void reset_simulation(bool hard)
 	ball.y = ball.s_y;
 	ball.z = ball.s_z;
 
-	ball.vx= 0.02f;
-	ball.vy= 0.03f;
-	ball.vz= 0.01f;
-	ball.ax= 0.0f;
-	ball.ay= 0.0f;
-	ball.az= 0.0f;
-	ball.force = 0.0f;
+	ball.vx = ball.s_vx;
+	ball.vy = ball.s_vy;
+	ball.vz = ball.s_vz;
+
+	ball.ax = ball.s_ax;
+	ball.ay = ball.s_ay;
+	ball.az = ball.s_az;
 
 	if (hard)
         reset_camera();
