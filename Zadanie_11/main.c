@@ -11,6 +11,7 @@
 #include <stdio.h>
 
 #define BUFFER_SIZE 256
+#define FPS 360
 
 void get_data();
 void draw();
@@ -74,8 +75,9 @@ void write_ball_to_file(Ball* ball)
 
 void update_pos() {
 	if (!running) return;
+	update_balls_2(check_ball_collision_and_apply_impulse, balls, N, true);
+	update_balls(check_wall_collision_and_apply_impulse, balls, N);
 	update_balls(ball_move, balls, N);
-	update_balls_2(apply_impulse, balls, N, true);
 	update_balls_2(calculate_ball_collision_time, balls, N, true);
 	update_balls(calculate_wall_collision_time, balls, N);
 	update_balls(write_ball_to_file, balls, N);
@@ -142,6 +144,7 @@ void key_handler(unsigned char key, int x, int y) {
 			break;
         case 'r':
 	        reset_simulation(false);
+
             break;
 	    case 'R':
 		    reset_simulation(true);

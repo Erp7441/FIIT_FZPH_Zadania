@@ -39,16 +39,6 @@ Ball* add_balls(Ball* balls, int *original_count, int new_count);
 Ball* remove_balls(Ball* balls, int *original_count, int new_count);
 
 void ball_move(Ball* b) {
-	if (ball_collided_bounds(b, X))
-	{
-		b->vel.x = -b->vel.x;
-	}
-
-	if (ball_collided_bounds(b, Y))
-	{
-		b->vel.y = -b->vel.y;
-	}
-
 	b->prev_pos.x = b->pos.x;
 	b->prev_pos.y = b->pos.y;
 	b->pos.x += to_meters(b->vel.x);
@@ -56,7 +46,15 @@ void ball_move(Ball* b) {
 
 }
 
-void apply_impulse(Ball* b1, Ball* b2)
+void check_wall_collision_and_apply_impulse(Ball* b)
+{
+	if (ball_collided_bounds(b, X))
+		b->vel.x = -b->vel.x;
+	if (ball_collided_bounds(b, Y))
+		b->vel.y = -b->vel.y;
+}
+
+void check_ball_collision_and_apply_impulse(Ball* b1, Ball* b2)
 {
 	if (b1->id == b2->id) return;
 
@@ -143,11 +141,30 @@ Ball generate_ball(int id)
 	};
 }
 
+bool ball_pos_taken(Ball* ball, Ball* balls, int i)
+{
+	for (int j = 0; j <= i; j++) {
+		if (balls_collided(ball, &(balls[j])))
+			return true;
+	}
+	return false;
+}
+
 Ball* generate_balls(int count)
 {
 	Ball* balls = (Ball*) calloc(count, sizeof(Ball));
 	for (int i = 0; i < count; i++) {
-		balls[i] = generate_ball(i + 1);
+
+		Ball* ball = (Ball*) malloc(sizeof(Ball));
+		*ball = generate_ball(i);
+
+		if (ball_pos_taken(ball, balls, i)) {
+			free(ball);
+			i--;
+			continue;
+		}
+
+		balls[i] = *ball;
 		print_ball(balls[i]);
 	}
 
@@ -171,7 +188,16 @@ Ball* add_balls(Ball* balls, int *original_count, int new_count)
 
 	for (int i = original; i < new_count; i++)
 	{
-		new_balls[i] = generate_ball(i + 1);
+		Ball* ball = (Ball*) malloc(sizeof(Ball));
+		*ball = generate_ball(i);
+
+		if (ball_pos_taken(ball, balls, i)) {
+			free(ball);
+			i--;
+			continue;
+		}
+
+		new_balls[i] = *ball;
 		print_ball(new_balls[i]);
 	}
 
@@ -255,12 +281,13 @@ bool balls_collided_ref(Ball* b1, Ball* b2, float* dx, float* dy, float* dist)
 	*dx = b1->pos.x - b2->pos.x;
 	*dy = b1->pos.y - b2->pos.y;
 	*dist = sqrtf(*dx * *dx + *dy * *dy);
+	if (*dx * *dx + *dy * *dy < 0) printf("was?\n");
 	return *dist < d1 + d2;
 }
 
 bool ball_collided_bounds(Ball* b, Axis a)
 {
-	float offset = b->r * 2.f;
+	float offset = b->r * 2.f + 0.01f;
 	if (a == X && b->pos.x - offset <= bounds.min.x || b->pos.x + offset >= bounds.max.x)
 		return true;
 
