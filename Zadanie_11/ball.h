@@ -210,36 +210,15 @@ Ball* remove_balls(Ball* balls, int *original_count, int new_count)
 	// TODO:: Implement?
 }
 
+
 void calculate_ball_collision_time(Ball* b1, Ball* b2) {
-	// Koeficienty kvadratickej rovnice
-	float r12x = b2->pos.x - b1->pos.x;
-	float r12y = b2->pos.y - b1->pos.y;
-	float v12x = b2->vel.x - b1->vel.x;
-	float v12y = b2->vel.y - b1->vel.y;
-	float R = b1->r * 2.0f; // Predpokladáme rovnaký polomer pre obe guľky
+	Vector r = {b2->pos.x - b1->pos.x, b2->pos.y - b1->pos.y};
+	Vector v = {b2->vel.x - b1->vel.x, b2->vel.y - b1->vel.y};
 
-	float a = v12x * v12x + v12y * v12y;
-	float b = 2.0f * (r12x * v12x + r12y * v12y);
-	float c = r12x * r12x + r12y * r12y - R * R;
-
-	// Diskriminánt kvadratickej rovnice
-	float discriminant = b * b - 4.0f * a * c;
-
-	// Ak je diskriminánt kladný, existujú dva reálne korene
-	if (discriminant >= 0) {
-		float t1 = (-b + sqrtf(discriminant)) / (2.0f * a);
-		float t2 = (-b - sqrtf(discriminant)) / (2.0f * a);
-
-		// Vráť menší z koreňov
-		b1->t.crash_ball = fminf(t1, t2);
-		b2->t.crash_ball = fminf(t1, t2);
-	} else {
-		// V opačnom prípade neexistuje reálny koreň, takže neexistuje kolízia
-		b1->t.crash_ball = INFINITY;
-		b2->t.crash_ball = INFINITY;
-	}
-
-	// TODO:: fix permanent infinity
+	float d = fabsf(vector_magnitude(r)) - (b1->r + b2->r);
+	float t = d / fabsf(vector_magnitude(v));
+	b1->t.crash_ball = t;
+	b2->t.crash_ball = t;
 }
 
 
@@ -247,7 +226,7 @@ void calculate_wall_collision_time(Ball* b) {
 	float t_x = INFINITY;
 	float t_y = INFINITY;
 
-	// Vypočítaj čas kolízie s hranicami v oboch osiach (x a y)
+	// Cas kolizie s hranou na X a Y
 	if (b->vel.x > 0) {
 		t_x = (bounds.max.x - (b->pos.x + b->r)) / b->vel.x;
 	} else if (b->vel.x < 0) {
@@ -260,7 +239,7 @@ void calculate_wall_collision_time(Ball* b) {
 		t_y = ((b->pos.y - b->r) - bounds.min.y) / (-b->vel.y);
 	}
 
-	// Vyber menší z časov kolízie v oboch osiach
+	// Mensi z casov
 	b->t.crash_border = fminf(t_x, t_y);
 }
 
@@ -268,20 +247,18 @@ bool balls_collided(Ball* b1, Ball* b2)
 {
 	float d1 = b1->r * 2.f;
 	float d2 = b2->r * 2.f;
-	float dx = b1->pos.x - b2->pos.x;
-	float dy = b1->pos.y - b2->pos.y;
-	float dist = sqrtf(dx * dx + dy * dy);
-	return dist < d1 + d2;  // TODO:: Fix stucking into each other bug
+	Vector d = {b1->pos.x - b2->pos.x, b1->pos.y - b2->pos.y};
+	float dist = vector_magnitude(d);
+	return dist < d1 + d2;
 }
 
 bool balls_collided_ref(Ball* b1, Ball* b2, float* dx, float* dy, float* dist)
 {
 	float d1 = b1->r * 2.f;
 	float d2 = b2->r * 2.f;
-	*dx = b1->pos.x - b2->pos.x;
-	*dy = b1->pos.y - b2->pos.y;
-	*dist = sqrtf(*dx * *dx + *dy * *dy);
-	if (*dx * *dx + *dy * *dy < 0) printf("was?\n");
+	Vector d = {b1->pos.x - b2->pos.x, b1->pos.y - b2->pos.y};
+	*dx = d.x; *dy = d.y;
+	*dist = vector_magnitude(d);
 	return *dist < d1 + d2;
 }
 

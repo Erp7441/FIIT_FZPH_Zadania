@@ -12,6 +12,15 @@
 
 #define BUFFER_SIZE 256
 #define FPS 360
+//#define BALL_TIME_COLLISION_TEST
+//#define DEBUG_LINES
+
+#ifdef BALL_TIME_COLLISION_TEST
+	#define INIT_N 2
+#endif
+#ifndef BALL_TIME_COLLISION_TEST
+	#define INIT_N 1
+#endif
 
 void get_data();
 void draw();
@@ -23,7 +32,7 @@ void key_handler(unsigned char key, int x, int y);
 void reset_simulation(bool hard);
 void close_simulation();
 
-const int INIT_N = 1;
+
 
 // Simulation
 float anim_time = 0.f;
@@ -39,7 +48,7 @@ Bounds bounds = {
 };
 
 // File
-char data_header[] = "id,pos_x,pos_y,vel_x,vel_y,time\n";
+char data_header[] = "id,pos_x,pos_y,vel_x,vel_y,time,crash_ball,crash_border\n";
 FILE* data_file = NULL;  // CSV file containing data
 
 
@@ -70,7 +79,8 @@ int main(int argc, char **argv)
 void write_ball_to_file(Ball* ball)
 {
 	if (ball == NULL) return;
-	write_to_file(data_file, "%d,%f,%f,%f,%f,%f\n", ball->id, ball->pos.x, ball->pos.y, ball->vel.x, ball->vel.y, anim_time);
+	write_to_file(data_file, "%d,%f,%f,%f,%f,%f,%f,%f\n", ball->id, ball->pos.x, ball->pos.y, ball->vel.x, ball->vel.y,
+				  anim_time, ball->t.crash_ball, ball->t.crash_border);
 }
 
 void update_pos() {
@@ -98,7 +108,26 @@ void get_data()
     data_file = open_file(generate_file_path("../data.csv"), "w"); // FILE
     write_to_file(data_file, data_header); // FILE
 
-    printf("Press any key to start...\n");
+	#ifdef BALL_TIME_COLLISION_TEST
+		N = 2;
+		// Test1
+		balls[0].pos.x = 0.f; balls[0].pos.y = 0.f;
+		balls[0].vel.x = -0.4f; balls[0].vel.y = 0.0f;
+
+		balls[1].pos.x = -1.f; balls[1].pos.y = 0.f;
+		balls[1].vel.x = 0.4f; balls[1].vel.y = 0.0f;
+
+		// Test 2
+//		balls[0].pos.x = -0.35f; balls[0].pos.y = 0.f;
+//		balls[0].vel.x = -0.1f; balls[0].vel.y = 0.1f;
+//
+//		balls[1].pos.x = -0.75f; balls[1].pos.y = 0.25f;
+////		balls[1].vel.x = 0.4f; balls[1].vel.y = -0.4f;
+//		balls[1].vel.x = 0.1f; balls[1].vel.y = -0.1f;
+
+	#endif
+
+	printf("Press any key to start...\n");
     getchar();
 }
 
@@ -113,6 +142,14 @@ void draw()
 		glColor3f(balls[i].c.r, balls[i].c.g, balls[i].c.b);
 		draw_circle(balls[i].pos.x, balls[i].pos.y, 0.f, balls[i].r*2.f);
 	}
+
+#ifdef DEBUG_LINES
+	// Draw line where ball[0] is headed.
+	for (int i = 0; i < N; i++) {
+		glColor3f(1.f, 0.f, 0.f);
+		draw_trace_line(balls[i]);
+	}
+#endif
 
     glutSwapBuffers();
 }

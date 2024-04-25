@@ -11,6 +11,7 @@
 #include <GL/glut.h>
 #include <GL/freeglut.h>
 #include <math.h>
+#include "ball.h"
 
 #pragma once
 
@@ -311,4 +312,22 @@ void draw_bounds(float max_x, float max_y, float min_x, float min_y) {
 	glVertex2d(max_x, min_y);
 	glVertex2d(max_x, max_y);
 	glEnd();
+}
+
+void draw_trace_line(Ball ball)
+{
+	float angle = atan2f(ball.vel.y, ball.vel.x);
+	float length = sqrtf(ball.vel.x * ball.vel.x + ball.vel.y * ball.vel.y);
+	float x1 = ball.pos.x + cosf(angle) * length;
+	float y1 = ball.pos.y + sinf(angle) * length;
+	float x2 = ball.pos.x - cosf(angle) * length;
+	float y2 = ball.pos.y - sinf(angle) * length;
+
+	glLoadIdentity();
+	glLineWidth(30.0f);
+	glBegin(GL_LINES);
+	glVertex2f(x1, y1);
+	glVertex2f(x2, y2);
+	glEnd();
+	glLineWidth(1.f);
 }

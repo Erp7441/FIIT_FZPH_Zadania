@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <stdlib.h>
+#include <math.h>
 
 #ifndef ZADANIE_4_UTILS_H
 #define ZADANIE_4_UTILS_H
@@ -124,4 +125,8 @@ float random_number(float max, float min)
 	float range = max - min;
 	float random = ((float) rand()) / (float) RAND_MAX;
 	return (random * range) + min;
+}
+
+float vector_magnitude(Vector v) {
+	return sqrtf(v.x * v.x + v.y * v.y);
 }
