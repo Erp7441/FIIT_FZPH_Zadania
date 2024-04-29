@@ -11,14 +11,13 @@
 #include <stdio.h>
 
 #define BUFFER_SIZE 256
-#define FPS 360
+//#define VERBOSE
 //#define BALL_TIME_COLLISION_TEST
 //#define DEBUG_LINES
 
 #ifdef BALL_TIME_COLLISION_TEST
 	#define INIT_N 2
-#endif
-#ifndef BALL_TIME_COLLISION_TEST
+#else
 	#define INIT_N 1
 #endif
 
@@ -31,7 +30,6 @@ void key_handler(unsigned char key, int x, int y);
 // Utility
 void reset_simulation(bool hard);
 void close_simulation();
-
 
 
 // Simulation
@@ -52,12 +50,10 @@ char data_header[] = "id,pos_x,pos_y,vel_x,vel_y,time,crash_ball,crash_border\n"
 FILE* data_file = NULL;  // CSV file containing data
 
 
-
 int main(int argc, char **argv)
 {
 	srand((unsigned int)time(NULL));
 
-	balls = generate_balls(N);
     glutInit(&argc, argv);
 
     // Initializes GLUT window
@@ -107,6 +103,48 @@ void get_data()
 {
     data_file = open_file(generate_file_path("../data.csv"), "w"); // FILE
     write_to_file(data_file, data_header); // FILE
+
+	if (get_confirmation("Do you want to use input data? (Y/n):"))
+	{
+		#ifdef VERBOSE
+			params._m_set = input("Enter ball weight (0.0 ... 1.0):\n", &params.m, "%f");
+		#else
+			params._m_set = input("Enter ball weight (1.f):\n", &params.m, "%f");
+		#endif
+
+		if (!params._m_set || params.m < 0.0f || params.m > 1.0f)
+		{
+			#ifdef VERBOSE
+				printf("Using default value.\n");
+			#endif
+			params._m_set = false;
+		}
+
+		params._pos_set = input_vector("Enter ball position vector (x y):\n", &params.pos);
+		#ifdef VERBOSE
+			if (!params._pos_set) printf("Using random values.\n");
+		#endif
+
+		params._vel_set = input_vector("Enter ball velocity vector (x y):\n", &params.vel);
+		#ifdef VERBOSE
+			if (!params._vel_set) printf("Using random values.\n");
+		#endif
+
+		params._r_set = input("Enter ball radius (0.03f):\n", &params.r, "%f");
+		#ifdef VERBOSE
+			if (!params._r_set) printf("Using default value.\n");
+		#endif
+	}
+	else
+	{
+		printf("Using default parameters:\n");
+		printf("Ball weight: %.3f\n", params.m);
+		printf("Ball position: random\n");
+		printf("Ball velocity: random\n");
+		printf("Ball radius: %.3f\n\n", params.r);
+	}
+
+	balls = generate_balls(N);
 
 	#ifdef BALL_TIME_COLLISION_TEST
 		N = 2;

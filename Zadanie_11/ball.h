@@ -23,6 +23,28 @@ typedef struct {
 	Time t;
 } Ball;
 
+// Input parameters
+typedef struct {
+	float m;
+	bool _m_set;
+	Vector pos;
+	bool _pos_set;
+	Vector vel;
+	bool _vel_set;
+	float r;
+	bool _r_set;
+} Parameters;
+
+Parameters params = {
+	.m = 1.f,
+	._m_set = false,
+	.pos = {0.f, 0.f },
+	._pos_set = false,
+	.vel = {0.f, 0.f },
+	._vel_set = false,
+	.r = 0.03f,
+	._r_set = false
+};
 
 bool balls_collided_ref(Ball* b1, Ball* b2, float* dx, float* dy, float* dist);
 bool balls_collided(Ball* b1, Ball* b2);
@@ -93,7 +115,7 @@ void update_balls_2(void(*func)(Ball*, Ball*), Ball* balls, int count, bool skip
 	{
 		for (int j = i + 1; j < count; j++)
 		{
-			if (skip_same_ele && i == j) continue;
+			if (skip_same_ele && balls[i].id == balls[j].id) continue;
 			func(&(balls[i]), &(balls[j]));
 		}
 	}
@@ -121,18 +143,24 @@ void print_balls(Ball* balls, int count)
 
 Ball generate_ball(int id)
 {
-	float offset = 0.03f * 2.f;
+	float offset = params._r_set ? params.r * 2.f : 0.03f * 2.f;
+	Vector pos = {
+		.x = params._pos_set ? params.pos.x : random_number(bounds.max.x - offset, bounds.min.x + offset),
+		.y = params._pos_set ? params.pos.y : random_number(bounds.max.y - offset, bounds.min.y + offset)
+	};
+
+	Vector vel = {
+		.x = params._vel_set ? params.vel.x : random_number(1.f, 0.f),
+		.y = params._vel_set ? params.vel.y : random_number(1.f, 0.f)
+	};
 
 	return (Ball){
 		.id = id,
-		.pos = {
-			random_number(bounds.max.x - offset, bounds.min.x + offset),
-			random_number(bounds.max.y - offset, bounds.min.y + offset)
-		},
+		.pos = pos,
 		.prev_pos = { 0.f, 0.f },
-		.vel = { random_number(1.f, 0.f), random_number(1.f, 0.f) },
+		.vel = vel,
 		.r = offset / 2.f,
-		.m = 1.f,
+		.m = params._m_set ? params.m : 1.f,
 		.c = {
 			random_number(1.f, 0.1f),
 			random_number(1.f, 0.1f),
@@ -143,8 +171,9 @@ Ball generate_ball(int id)
 
 bool ball_pos_taken(Ball* ball, Ball* balls, int i)
 {
+	if (balls == NULL) return false;
 	for (int j = 0; j <= i; j++) {
-		if (balls_collided(ball, &(balls[j])))
+		if (ball->id != balls[j].id && balls_collided(ball, &(balls[j])))
 			return true;
 	}
 	return false;
@@ -212,6 +241,7 @@ Ball* remove_balls(Ball* balls, int *original_count, int new_count)
 
 
 void calculate_ball_collision_time(Ball* b1, Ball* b2) {
+	if (b1->id == b2->id) return;
 	Vector r = {b2->pos.x - b1->pos.x, b2->pos.y - b1->pos.y};
 	Vector v = {b2->vel.x - b1->vel.x, b2->vel.y - b1->vel.y};
 
@@ -245,6 +275,7 @@ void calculate_wall_collision_time(Ball* b) {
 
 bool balls_collided(Ball* b1, Ball* b2)
 {
+	if (b1->id == b2->id) return false;
 	float d1 = b1->r * 2.f;
 	float d2 = b2->r * 2.f;
 	Vector d = {b1->pos.x - b2->pos.x, b1->pos.y - b2->pos.y};
@@ -254,6 +285,7 @@ bool balls_collided(Ball* b1, Ball* b2)
 
 bool balls_collided_ref(Ball* b1, Ball* b2, float* dx, float* dy, float* dist)
 {
+	if (b1->id == b2->id) return false;
 	float d1 = b1->r * 2.f;
 	float d2 = b2->r * 2.f;
 	Vector d = {b1->pos.x - b2->pos.x, b1->pos.y - b2->pos.y};

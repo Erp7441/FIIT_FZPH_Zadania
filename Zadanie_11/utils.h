@@ -94,6 +94,15 @@ bool input(char* prompt, void* address, char* modifier)
 	return sscanf(str,modifier, address) == 1;
 }
 
+bool input_vector(char* prompt, Vector* address)
+{
+	printf(prompt);
+	char str[BUFFER_SIZE+3];
+	fgets(str, BUFFER_SIZE, stdin);
+	if (strncmp(str, "\n", 1) == 0) return false;
+	return sscanf(str,"%f %f", &address->x, &address->y) == 1;
+}
+
 float to_meters(float value)
 {
     return value / METERS_COEF;
